@@ -1,0 +1,17 @@
+@tailwind base;
+
+@tailwind components;
+
+div.post div.content img {
+  @apply my-4;
+}
+
+div.post div.content p {
+  @apply mb-4;
+}
+
+div.post div.content a {
+  @apply text-blue-600
+}
+
+@tailwind utilities;
