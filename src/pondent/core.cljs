@@ -1,5 +1,7 @@
 (ns ^:figwheel-hooks pondent.core
-  (:require [goog.dom :as gdom]
+  (:require [alandipert.storage-atom :refer [local-storage]]
+            [goog.dom :as gdom]
+            [pondent.time :as time]
             [pondent.github :as github]
             [pondent.markdown :as markdown]
             [reagent.core :as reagent :refer [atom]]))
@@ -9,8 +11,12 @@
 
 ;; define your app data so that it doesn't get over-written on reload
 (defonce app-state (atom {:screen :settings}))
-(defonce settings-state (atom {:owner nil :repo nil :branch "master" :posts-dir nil
-                               :commit-message "Add a post" :user nil :password nil}))
+
+(def settings-state
+  (local-storage
+    (atom {:owner nil :repo nil :branch "master" :posts-dir nil
+           :commit-message "Add a post" :user nil :password nil})
+    :settings-state))
 
 (defn settings-item [value label placeholder]
   [:<>
