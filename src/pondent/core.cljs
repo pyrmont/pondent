@@ -1,6 +1,7 @@
 (ns ^:figwheel-hooks pondent.core
-  (:require [pondent.markdown :as markdown]
-            [goog.dom :as gdom]
+  (:require [goog.dom :as gdom]
+            [pondent.github :as github]
+            [pondent.markdown :as markdown]
             [reagent.core :as reagent :refer [atom]]))
 
 ;; the maximum number of characters
