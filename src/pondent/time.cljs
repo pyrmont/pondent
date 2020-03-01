@@ -12,6 +12,11 @@
   ([date patt]
    (.format (new goog.i18n.DateTimeFormat patt) date)))
 
+(defn now
+  "Returns the current time."
+  []
+  (goog.date.DateTime.))
+
 (defn str->date
   "Parse a date, `s`, in ISO 8601 format and return a goog.date.DateTime object.
   An hour `offset` can also be provided that will be used to adjust the final

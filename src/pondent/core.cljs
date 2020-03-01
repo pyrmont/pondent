@@ -58,10 +58,28 @@
         [:button {:class "bg-blue-500 hover:bg-blue-700 mx-auto mt-4 px-4 py-2 rounded text-white"
                   :type "submit"} "Save"]]])))
 
+(defn composer-input-date [value label placeholder]
+  [:<>
+    [:label {:class "font-semibold block mt-3 w-2/12"} label]
+    [:input {:class "bg-gray-200 block focus:bg-white border border-gray-400 p-2 w-full"
+             :type "text"
+             :value @value
+             :placeholder placeholder
+             :on-change #(reset! value (-> % .-target .-value))}]])
+
+(defn composer-input-text [value label placeholder]
+  [:<>
+    [:label {:class "font-semibold block mt-3 w-2/12"} label]
+    [:input {:class "bg-gray-200 block focus:bg-white border border-gray-400 p-2 w-full"
+             :type "text"
+             :value @value
+             :placeholder placeholder
+             :on-change #(reset! value (-> % .-target .-value))}]])
+
 (defn composer []
   (let [content (atom nil)
         counter (atom max-chars)
-        date (atom nil)
+        date (atom (time/date->str (time/now) "yyyy-MM-dd hh:mm"))
         slug (atom nil)
         categories (atom nil)]
     (fn []
@@ -76,18 +94,9 @@
                     :on-change (fn [x]
                                  (reset! counter (-> x .-target .-value (markdown/chars-left max-chars)))
                                  (reset! content (-> x .-target .-value)))}]
-        [:label {:class "font-semibold inline-block mt-3 w-2/12"} "Slug"]
-        [:input {:class "bg-gray-200 inline-block focus:bg-white border border-gray-400 p-2 w-full"
-                 :type "text"
-                 :value @slug
-                 :placeholder "Enter a slug (optional)"
-                 :on-change #(reset! slug (-> % .-target .-value))}]
-        [:label {:class "font-semibold inline-block mt-3 w-2/12"} "Categories"]
-        [:input {:class "bg-gray-200 inline-block focus:bg-white border border-gray-400 p-2 w-full"
-                 :type "text"
-                 :value @categories
-                 :placeholder "Enter the categories (optional)"
-                 :on-change #(reset! categories (-> % .-target .-value))}]
+        [composer-input-date date "Date" "YYYY-MM-DD HH:MM"]
+        [composer-input-text slug "Slug" "Enter a slug"]
+        [composer-input-text categories "Categories" "Enter the categories (optional)"]
         [:button {:class "bg-gray-500 hover:bg-red-700 float-left mx-auto mt-4 px-4 py-2 rounded text-white"
                   :type "button"
                   :on-click #(swap! app-state assoc :screen :timeline)} "Reset"]
