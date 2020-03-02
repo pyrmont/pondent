@@ -1,107 +1,104 @@
 (ns ^:figwheel-hooks pondent.core
   (:require [alandipert.storage-atom :refer [local-storage]]
             [goog.dom :as gdom]
-            [pondent.time :as time]
             [pondent.github :as github]
             [pondent.markdown :as markdown]
+            [pondent.time :as time]
             [reagent.core :as reagent :refer [atom]]))
 
 ;; the maximum number of characters
 (def max-chars 280)
 
 ;; define your app data so that it doesn't get over-written on reload
-(defonce app-state (atom {:screen :settings}))
-
-(def settings-state
+(defonce settings-state
   (local-storage
     (atom {:owner nil :repo nil :branch "master" :posts-dir nil
-           :commit-message "Add a post" :user nil :password nil})
+           :commit-message "Add a post" :user nil :password nil
+           :init? false})
     :settings-state))
 
-(defn settings-item [value label placeholder]
+(defonce app-state (atom {:screen (if (:init? @settings-state) :composer :settings)}))
+
+;; defaults for a post
+(defn post-defaults []
+  {:content nil
+   :date (time/date->str (time/now))
+   :slug nil
+   :categories nil})
+
+(defn settings-item [item-name label placeholder]
   [:<>
     [:label {:class "font-semibold inline-block text-left w-3/12"} label]
     [:input {:class "bg-gray-200 inline-block focus:bg-white border border-gray-400 p-2 my-2 w-9/12"
              :type "text"
-             :value @value
+             :value (item-name @settings-state)
              :placeholder placeholder
-             :on-change #(reset! value (-> % .-target .-value))}]])
+             :on-change #(swap! settings-state assoc item-name (-> % .-target .-value))}]])
 
 (defn settings []
-  (let [owner (atom (:owner @settings-state))
-        repo (atom (:repo @settings-state))
-        branch (atom (:branch @settings-state))
-        posts-dir (atom (:posts-dir @settings-state))
-        commit-message (atom (:commit-message @settings-state))
-        user (atom (:user @settings-state))
-        password (atom (:password @settings-state))]
-    (fn []
-      [:div#settings {:class "bg-white text-right max-w-md mx-auto my-4 p-4 shadow"}
-       [:form {:on-submit (fn [x]
-                            (.preventDefault x)
-                            (reset! settings-state {:owner @owner
-                                                    :repo @repo
-                                                    :branch @branch
-                                                    :posts-dir @posts-dir
-                                                    :commit-message @commit-message
-                                                    :user @user
-                                                    :password @password})
-                            (swap! app-state assoc :screen :composer))}
-        [:h2 {:class "mb-2 text-center text-xl"} "Settings"]
-        [settings-item owner "Owner:" "Enter the repository owner"]
-        [settings-item repo "Repo:" "Enter the repository name"]
-        [settings-item branch "Branch:" "Enter the repository branch"]
-        [settings-item posts-dir "Directory:" "Enter the posts directory"]
-        [settings-item commit-message "Message:" "Enter the commit message"]
-        [settings-item user "User:" "Enter the GitHub user"]
-        [settings-item password "Token:" "Enter the GitHub access token"]
-        [:button {:class "bg-blue-500 hover:bg-blue-700 mx-auto mt-4 px-4 py-2 rounded text-white"
-                  :type "submit"} "Save"]]])))
+  [:div#settings {:class "bg-white text-right max-w-md mx-auto my-4 p-4 shadow"}
+   [:form {:on-submit (fn [x]
+                        (.preventDefault x)
+                        (swap! settings-state assoc :init? true)
+                        (swap! app-state assoc :screen :composer))}
+    [:h2 {:class "mb-2 text-center text-xl"} "Settings"]
+    [settings-item :owner "Owner:" "Enter the repository owner"]
+    [settings-item :repo "Repo:" "Enter the repository name"]
+    [settings-item :branch "Branch:" "Enter the repository branch"]
+    [settings-item :posts-dir "Directory:" "Enter the posts directory"]
+    [settings-item :commit-message "Message:" "Enter the commit message"]
+    [settings-item :user "User:" "Enter the GitHub user"]
+    [settings-item :password "Token:" "Enter the GitHub access token"]
+    [:button {:class "bg-blue-500 hover:bg-blue-700 mx-auto mt-4 px-4 py-2 rounded text-white"
+              :type "submit"} "Compose"]]])
 
-(defn composer-input-date [value label placeholder]
+(defn composer-input-date [form input-name label placeholder]
   [:<>
     [:label {:class "font-semibold block mt-3 w-2/12"} label]
     [:input {:class "bg-gray-200 block focus:bg-white border border-gray-400 p-2 w-full"
              :type "text"
-             :value @value
+             :value (input-name @form)
              :placeholder placeholder
-             :on-change #(reset! value (-> % .-target .-value))}]])
+             :on-change #(swap! form assoc input-name (-> % .-target .-value))}]])
 
-(defn composer-input-text [value label placeholder]
+(defn composer-input-text [form input-name label placeholder]
   [:<>
     [:label {:class "font-semibold block mt-3 w-2/12"} label]
     [:input {:class "bg-gray-200 block focus:bg-white border border-gray-400 p-2 w-full"
              :type "text"
-             :value @value
+             :value (input-name @form)
              :placeholder placeholder
-             :on-change #(reset! value (-> % .-target .-value))}]])
+             :on-change #(swap! form assoc input-name (-> % .-target .-value))}]])
 
 (defn composer []
-  (let [content (atom nil)
-        counter (atom max-chars)
-        date (atom (time/date->str (time/now) "yyyy-MM-dd hh:mm"))
-        slug (atom nil)
-        categories (atom nil)]
+  (let [post (atom (post-defaults))
+        counter (atom max-chars)]
     (fn []
-      [:div#composer {:class "bg-white clearfix max-w-md mx-auto my-4 p-4 shadow"}
-       [:form {:on-submit (fn [x]
-                            (.preventDefault x)
-                            (swap! app-state assoc :screen :composer))}
-        [:span#counter {:class "float-right" } @counter]
-        [:textarea {:class "bg-gray-200 focus:bg-white border border-gray-400 h-56 p-2 w-full"
-                    :value @content
-                    :placeholder "What do you want to say?"
-                    :on-change (fn [x]
-                                 (reset! counter (-> x .-target .-value (markdown/chars-left max-chars)))
-                                 (reset! content (-> x .-target .-value)))}]
-        [composer-input-date date "Date" "YYYY-MM-DD HH:MM"]
-        [composer-input-text slug "Slug" "Enter a slug"]
-        [composer-input-text categories "Categories" "Enter the categories (optional)"]
-        [:button {:class "bg-gray-500 hover:bg-red-700 float-left mx-auto mt-4 px-4 py-2 rounded text-white"
-                  :type "button"
-                  :on-click #(swap! app-state assoc :screen :timeline)} "Reset"]
-        [:button {:class "bg-blue-500 hover:bg-blue-700 float-right mx-auto mt-4 px-4 py-2 rounded text-white"
-                  :type "submit"} "Post"]]])))
+      [:<>
+       [:div#composer {:class "bg-white clearfix max-w-md mx-auto my-4 p-4 shadow"}
+        [:form {:on-submit (fn [x]
+                             (.preventDefault x))}
+         [:span#counter {:class "float-right" } @counter]
+         [:textarea {:class "bg-gray-200 focus:bg-white border border-gray-400 h-56 p-2 w-full"
+                     :value (:content @post)
+                     :placeholder "What do you want to say?"
+                     :on-change (fn [x]
+                                  (reset! counter (-> x .-target .-value (markdown/chars-left max-chars)))
+                                  (swap! post assoc :content (-> x .-target .-value)))}]
+         [composer-input-date post :date "Date" "YYYY-MM-DD HH:MM"]
+         [composer-input-text post :slug "Slug" "Enter a slug"]
+         [composer-input-text post :categories "Categories" "Enter the categories (optional)"]
+         [:button {:class "bg-gray-500 hover:bg-red-700 float-left mx-auto mt-4 px-4 py-2 rounded text-white"
+                   :type "button"
+                   :on-click #(reset! post (post-defaults))} "Reset"]
+         [:button {:class "bg-blue-500 hover:bg-blue-700 float-right mx-auto mt-4 px-4 py-2 rounded text-white"
+                   :type "submit"} "Post"]]]
+       [:footer {:class "text-center"}
+        [:a {:class "text-gray-500 underline"
+             :href ""
+             :on-click (fn [x]
+                         (.preventDefault x)
+                         (swap! app-state assoc :screen :settings))} "Settings"]]])))
 
 (defn app-container []
   (case (:screen @app-state)

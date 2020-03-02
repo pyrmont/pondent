@@ -24,7 +24,9 @@
   ([s]
    (str->date s 0))
   ([s offset]
-   (->> s
-        (.parse js/Date)
-        (+ (* offset 60 60 1000))
-        (.fromTimestamp goog.date.DateTime))))
+   (let [millis (.parse js/Date s)]
+     (if (.isNaN js/Number millis)
+       nil
+       (->> millis
+            (+ (* offset 60 60 1000))
+            (.fromTimestamp goog.date.DateTime))))))
