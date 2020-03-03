@@ -25,6 +25,11 @@
               (string/join ", "))
          "]\n")))
 
+(defn format-body
+  "Format `body` into a form appropriate for frontmatter."
+  [body]
+  (str (string/trim-newline body) "\n"))
+
 (defn format-post
   "Format a post for Jekyll."
   [body date title categories]
@@ -33,7 +38,7 @@
        (format-title title)
        (format-categories categories)
        "---\n\n"
-       body))
+       (format-body body)))
 
 (defn input-errors
   "Return any errors in the input."
