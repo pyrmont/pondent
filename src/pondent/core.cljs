@@ -3,21 +3,23 @@
             [goog.dom :as gdom]
             [pondent.github :as github]
             [pondent.markdown :as markdown]
+            [pondent.posting :as posting]
             [pondent.time :as time]
+            [promesa.core :as p]
             [reagent.core :as reagent :refer [atom]]))
 
 ;; the maximum number of characters
 (def max-chars 280)
 
-;; define your app data so that it doesn't get over-written on reload
-(defonce settings-state
-  (local-storage
-    (atom {:owner nil :repo nil :branch "master" :posts-dir nil
-           :commit-message "Add a post" :user nil :password nil
-           :init? false})
-    :settings-state))
-
-(defonce app-state (atom {:screen (if (:init? @settings-state) :composer :settings)}))
+(def messages
+  {:success         {:title "Post Created"
+                     :body "Your post was created. How about another?"}
+   :missing-content {:title "Missing Content"
+                     :body "The post did not contain any content."}
+   :missing-slug    {:title "Missing Slug"
+                     :body "The post did not contain a slug."}
+   :save-failure    {:title "Save Failed"
+                     :body "The post was not saved to the repository. The server returned the following response:"}})
 
 ;; defaults for a post
 (defn post-defaults []
@@ -25,6 +27,19 @@
    :date (time/date->str (time/now))
    :slug nil
    :categories nil})
+
+;; the settings
+(defonce settings-state
+  (local-storage
+    (atom {:owner nil :repo nil :branch "master" :posts-dir nil
+           :commit-message "Add a post" :user nil :password nil
+           :init? false})
+    :settings-state))
+
+;; the app state
+(defonce app-state (atom {:screen (if (:init? @settings-state) :composer :settings)}))
+(defonce post-state (atom (post-defaults)))
+(defonce result-state (atom nil))
 
 (defn settings-item [item-name label placeholder]
   [:<>
@@ -71,13 +86,30 @@
              :on-change #(swap! form assoc input-name (-> % .-target .-value))}]])
 
 (defn composer []
-  (let [post (atom (post-defaults))
-        counter (atom max-chars)]
+  (let [counter (atom max-chars)
+        post post-state
+        result result-state]
     (fn []
       [:<>
+       (when-let [message @result]
+         [:div#message
+          (if (posting/success? message)
+            {:class "bg-teal-100 border border-teal-500 max-w-md mx-auto text-teal-900 px-4 py-3 my-2 rounded"}
+            {:class "bg-red-100 border border-red-400 max-w-md mx-auto text-red-700 px-4 py-3 my-2 rounded"})
+          [:h3 {:class "font-bold"} (-> message :kind messages :title)]
+          [:p (-> message :kind messages :body)]
+          (when-let [error (:error message)]
+            [:pre {:class "mt-3 overflow-x-auto"} (:body error)])])
        [:div#composer {:class "bg-white clearfix max-w-md mx-auto my-4 p-4 shadow"}
         [:form {:on-submit (fn [x]
-                             (.preventDefault x))}
+                             (.preventDefault x)
+                             (-> (posting/create-post @post @settings-state)
+                                 (p/then
+                                   (fn [x]
+                                     (reset! result x)
+                                     (when (posting/success? x)
+                                       (reset! post (post-defaults))
+                                       (reset! counter max-chars))))))}
          [:span#counter {:class "float-right" } @counter]
          [:textarea {:class "bg-gray-200 focus:bg-white border border-gray-400 h-56 p-2 w-full"
                      :value (:content @post)
@@ -90,7 +122,10 @@
          [composer-input-text post :categories "Categories" "Enter the categories (optional)"]
          [:button {:class "bg-gray-500 hover:bg-red-700 float-left mx-auto mt-4 px-4 py-2 rounded text-white"
                    :type "button"
-                   :on-click #(reset! post (post-defaults))} "Reset"]
+                   :on-click (fn [x]
+                               (reset! counter max-chars)
+                               (reset! post (post-defaults))
+                               (reset! result nil))} "Reset"]
          [:button {:class "bg-blue-500 hover:bg-blue-700 float-right mx-auto mt-4 px-4 py-2 rounded text-white"
                    :type "submit"} "Post"]]]
        [:footer {:class "text-center"}

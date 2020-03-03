@@ -1,7 +1,7 @@
 (ns pondent.github
   (:require [goog.crypt.base64 :as base64]
             [httpurr.client.xhr :as http]
-            [pondent.time :as time]
+            [httpurr.status :as s]
             [promesa.core :as p]))
 
 ;; General functions
@@ -29,11 +29,6 @@
   [data]
   (-> data clj->js js/JSON.stringify))
 
-(defn post-path
-  "Make the path to the post."
-  [dir date slug]
-  (str dir (time/date->str date "yyyy-MM-dd") "-" slug ".md"))
-
 ;; HTTP methods
 
 (defn PUT
@@ -43,13 +38,22 @@
 
 ; ;; High level actions
 
-(defn create-post
-  "Create a post in the GitHub repository in one step."
-  [{:keys [content date slug] :as data}
-   {:keys [owner repo dir commit-message user password] :as settings}]
-  (let [path    (post-path dir date slug)
-        url     (github-url (str "/repos/" owner "/" repo "/contents/" path))
+(defn process-response
+  "Process the response from GitHub and return the appropriate."
+  [response]
+  (assoc response :status (condp = (:status response)
+                             s/created      :success
+                             s/not-found    :not-found
+                             s/unauthorized :unauthorized
+                             :error)))
+
+(defn create-file
+  "Create a file in the GitHub repository in one step."
+  [{:keys [content path commit-message] :as data}
+   {:keys [owner repo user password] :as settings}]
+  (let [url     (github-url (str "/repos/" owner "/" repo "/contents/" path))
         payload (map->body {:message commit-message
-                            :content (base64/encodeString content)})
+                            :content content})
         opts    {:user user :password password}]
-    (PUT url payload opts)))
+    (-> (PUT url payload opts)
+        (p/then #(process-response %)))))
