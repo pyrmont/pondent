@@ -105,9 +105,9 @@
                              (.preventDefault x)
                              (-> (posting/create-post @post @settings-state)
                                  (p/then
-                                   (fn [x]
-                                     (reset! result x)
-                                     (when (posting/success? x)
+                                   (fn [y]
+                                     (reset! result y)
+                                     (when (posting/success? y)
                                        (reset! post (post-defaults))
                                        (reset! counter max-chars))))))}
          [:span#counter {:class "float-right" } @counter]

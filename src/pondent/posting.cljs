@@ -5,24 +5,35 @@
             [pondent.time :as time]
             [promesa.core :as p]))
 
+(defn format-date
+  "Format `date` into a form appropriate for frontmatter."
+  [date]
+  (str "date: " (time/date->str date "yyyy-MM-dd HH:mm:ss Z\n")))
+
+(defn format-title
+  "Format `title` into a form appropriate for frontmatter."
+  [title]
+  (when (not (string/blank? title))  (str "title: \"" title "\"\n")))
+
+(defn format-categories
+  "Format `categories` into a form appropriate for frontmatter."
+  [categories]
+  (when (not (string/blank? categories))
+    (str "categories: ["
+         (->> (string/split categories #" ")
+              (map #(str "\"" % "\""))
+              (string/join ", "))
+         "]\n")))
+
 (defn format-post
   "Format a post for Jekyll."
   [body date title categories]
   (str "---\n"
-       "date: " (time/date->str date "yyyy-MM-dd HH:mm:ss Z\n")
-       (when title (str "title: \"" title "\"\n"))
-       (when categories (str "categories: ["
-                             (->> (string/split categories #" ")
-                                  (map #(str "\"" % "\""))
-                                  (string/join ", "))
-                             "]\n"))
+       (format-date date)
+       (format-title title)
+       (format-categories categories)
        "---\n\n"
        body))
-
-(defn post-path
-  "Construct a path to the post."
-  [dir date slug]
-  (str dir (time/date->str date "yyyy-MM-dd") "-" slug ".md"))
 
 (defn input-errors
   "Return any errors in the input."
@@ -31,12 +42,15 @@
     (string/blank? content) {:kind :missing-content}
     (string/blank? slug)    {:kind :missing-slug}))
 
+(defn post-path
+  "Construct a path to the post."
+  [dir date slug]
+  (str dir (time/date->str date "yyyy-MM-dd") "-" slug ".md"))
+
 (defn success?
   "Returns `true` if `result` represents success."
   [result]
   (and (map? result) (= :success (:kind result))))
-
-; (defn create-post [post settings] (p/promise {:kind :success}))
 
 (defn create-post
   "Create the `post` using the `settings`."
