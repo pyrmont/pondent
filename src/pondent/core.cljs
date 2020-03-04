@@ -13,6 +13,7 @@
 ;; the maximum number of characters
 (def max-chars 280)
 
+
 (def messages
   {:success         {:title "Post Created"
                      :body "Your post was created. How about another?"}
@@ -23,12 +24,14 @@
    :save-failure    {:title "Save Failed"
                      :body "The post was not saved to the repository. The server returned the following response:"}})
 
+
 ;; defaults for a post
 (defn post-defaults []
   {:content nil
    :date (time/date->str (time/now))
    :slug nil
    :categories nil})
+
 
 ;; the settings
 (defonce settings-state
@@ -38,10 +41,12 @@
            :init? false})
     :settings-state))
 
+
 ;; the app state
 (defonce app-state (atom nil))
 (defonce post-state (atom (post-defaults)))
 (defonce result-state (atom nil))
+
 
 (defn settings-item [item-name label placeholder]
   [:<>
@@ -51,6 +56,7 @@
              :value (item-name @settings-state)
              :placeholder placeholder
              :on-change #(swap! settings-state assoc item-name (-> % .-target .-value))}]])
+
 
 (defn settings-page [route]
   [:div#settings {:class "bg-white text-right max-w-md mx-auto my-4 p-4 shadow"}
@@ -69,6 +75,7 @@
     [:button {:class "bg-blue-500 hover:bg-blue-700 mx-auto mt-4 px-4 py-2 rounded text-white"
               :type "submit"} "Compose"]]])
 
+
 (defn composer-input-date [form input-name label placeholder]
   [:<>
     [:label {:class "font-semibold block mt-3 w-2/12"} label]
@@ -78,6 +85,7 @@
              :placeholder placeholder
              :on-change #(swap! form assoc input-name (-> % .-target .-value))}]])
 
+
 (defn composer-input-text [form input-name label placeholder]
   [:<>
     [:label {:class "font-semibold block mt-3 w-2/12"} label]
@@ -86,6 +94,7 @@
              :value (input-name @form)
              :placeholder placeholder
              :on-change #(swap! form assoc input-name (-> % .-target .-value))}]])
+
 
 (defn composer-message [message]
   (when message
@@ -97,6 +106,7 @@
      [:p (-> message :kind messages :body)]
      (when-let [error (:error message)]
        [:pre {:class "mt-3 overflow-x-auto"} (:body error)])]))
+
 
 (defn composer-page [route]
   [:<>
@@ -130,23 +140,29 @@
     [:a {:class "text-gray-500 underline"
          :href (router/href ::settings)} "Settings"]]])
 
+
 (defn index-page [route]
   (router/replace-state (if (:init? @settings-state) ::composer ::settings)))
+
 
 (defn app-container []
   (let [route (-> @app-state :route)
         view (-> route :data :view)]
     [view route]))
 
+
 (defn mount [el]
   (reagent/render [app-container] el))
+
 
 (defn get-app-element []
   (gdom/getElement "app"))
 
+
 (defn mount-app-element []
   (when-let [el (get-app-element)]
     (mount el)))
+
 
 (def routes
   [["/" {:name ::index
@@ -156,6 +172,7 @@
    ["/settings" {:name ::settings
                  :view settings-page}]])
 
+
 (defn init! []
   (router/start!
     (reitit/router routes)
@@ -164,7 +181,9 @@
     {:use-fragment true})
   (mount-app-element))
 
+
 (init!)
+
 
 ;; conditionally start your application based on the presence of an "app" element
 ;; this is particularly helpful for testing this ns without launching the app
