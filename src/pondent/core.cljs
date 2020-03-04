@@ -6,7 +6,9 @@
             [pondent.posting :as posting]
             [pondent.time :as time]
             [promesa.core :as p]
-            [reagent.core :as reagent :refer [atom]]))
+            [reagent.core :as reagent :refer [atom]]
+            [reitit.frontend :as reitit]
+            [reitit.frontend.easy :as router]))
 
 ;; the maximum number of characters
 (def max-chars 280)
@@ -37,7 +39,7 @@
     :settings-state))
 
 ;; the app state
-(defonce app-state (atom {:screen (if (:init? @settings-state) :composer :settings)}))
+(defonce app-state (atom nil))
 (defonce post-state (atom (post-defaults)))
 (defonce result-state (atom nil))
 
@@ -50,12 +52,12 @@
              :placeholder placeholder
              :on-change #(swap! settings-state assoc item-name (-> % .-target .-value))}]])
 
-(defn settings []
+(defn settings-page [route]
   [:div#settings {:class "bg-white text-right max-w-md mx-auto my-4 p-4 shadow"}
    [:form {:on-submit (fn [x]
                         (.preventDefault x)
                         (swap! settings-state assoc :init? true)
-                        (swap! app-state assoc :screen :composer))}
+                        (router/push-state ::composer))}
     [:h2 {:class "mb-2 text-center text-xl"} "Settings"]
     [settings-item :owner "Owner:" "Enter the repository owner"]
     [settings-item :repo "Repo:" "Enter the repository name"]
@@ -85,11 +87,11 @@
              :placeholder placeholder
              :on-change #(swap! form assoc input-name (-> % .-target .-value))}]])
 
-(defn composer []
+(defn composer-page [route]
   (let [counter (atom max-chars)
         post post-state
         result result-state]
-    (fn []
+    (fn [route]
       [:<>
        (when-let [message @result]
          [:div#message
@@ -130,15 +132,15 @@
                    :type "submit"} "Post"]]]
        [:footer {:class "text-center"}
         [:a {:class "text-gray-500 underline"
-             :href ""
-             :on-click (fn [x]
-                         (.preventDefault x)
-                         (swap! app-state assoc :screen :settings))} "Settings"]]])))
+             :href (router/href ::settings)} "Settings"]]])))
+
+(defn index-page [route]
+  (router/replace-state (if (:init? @settings-state) ::composer ::settings)))
 
 (defn app-container []
-  (case (:screen @app-state)
-    :settings [settings]
-    :composer [composer]))
+  (let [route (:route @app-state)
+        view (-> route :data :view)]
+    [view route]))
 
 (defn mount [el]
   (reagent/render [app-container] el))
@@ -150,9 +152,27 @@
   (when-let [el (get-app-element)]
     (mount el)))
 
+(def routes
+  [["/" {:name ::index
+         :view index-page}]
+   ["/composer" {:name ::composer
+                 :view composer-page}]
+   ["/settings" {:name ::settings
+                 :view settings-page}]])
+
+(defn init! []
+  (router/start!
+    (reitit/router routes)
+    (fn [m] (swap! app-state assoc :route m))
+     ;; set to false to enable HistoryAPI
+    {:use-fragment true})
+  (mount-app-element))
+
+(init!)
+
 ;; conditionally start your application based on the presence of an "app" element
 ;; this is particularly helpful for testing this ns without launching the app
-(mount-app-element)
+;; (mount-app-element)
 
 ;; specify reload hook with ^;after-load metadata
 (defn ^:after-load on-reload []
