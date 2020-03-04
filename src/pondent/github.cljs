@@ -4,6 +4,7 @@
             [httpurr.status :as s]
             [promesa.core :as p]))
 
+
 ;; General functions
 
 (defn add-headers
@@ -14,20 +15,24 @@
                              "Authorization" (str "Basic " userpass)
                              "Content-Type" "application/json"})))
 
+
 (defn body->map
   "Decode the body of an HTTP response object into a Clojure map."
   [response]
   (-> response :body js/JSON.parse (js->clj :keywordize-keys true)))
+
 
 (defn github-url
   "Make the GitHub URL."
   [url-part]
   (str "https://api.github.com" url-part))
 
+
 (defn map->body
   "Encode a Clojure map into the body of an HTTP response object."
   [data]
   (-> data clj->js js/JSON.stringify))
+
 
 ;; HTTP methods
 
@@ -35,6 +40,7 @@
   "Make a PUT request."
   [url payload opts]
   (http/put url (-> {:body payload} (add-headers opts))))
+
 
 ; ;; High level actions
 
@@ -46,6 +52,7 @@
                              s/not-found    :not-found
                              s/unauthorized :unauthorized
                              :error)))
+
 
 (defn create-file
   "Create a file in the GitHub repository in one step."
