@@ -22,7 +22,7 @@
   (if (not (meta-match? open close))
     nil
     (if (str/starts-with? close "](")
-      (- (count close) 4) ;; 4 for the [, ], ( and )
+      23 ;; This is the Twitter short link maximum length
       0)))
 
 (defn next-plain-char
