@@ -1,6 +1,7 @@
 (ns pondent.markdown
   (:require [clojure.string :as str]))
 
+
 ;; Character counts
 
 (defn meta-match?
@@ -16,6 +17,7 @@
     (= "[" open)  (str/ends-with? close ")")
     :else false))
 
+
 (defn meta-length
   "Return the number of characters to be counted."
   [open close]
@@ -24,6 +26,7 @@
     (if (str/starts-with? close "](")
       23 ;; This is the Twitter short link maximum length
       0)))
+
 
 (defn next-plain-char
   "Return the position of the next unambiguously plain character in `text`
@@ -42,6 +45,7 @@
                                           start)
       :else start)))
 
+
 (defn num-plain-chars
   "Calculate the number of plain characters."
   [text]
@@ -56,6 +60,7 @@
                 (recur next-pos (+ extra-length length) (pop meta-stack))
                 (recur next-pos length (conj meta-stack meta-chars))))))
         (+ length (reduce #(+ %1 (count %2)) 0 meta-stack))))))
+
 
 (defn chars-left
   "Calculate the number of characters left."
