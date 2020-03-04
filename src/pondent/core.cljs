@@ -87,58 +87,54 @@
              :placeholder placeholder
              :on-change #(swap! form assoc input-name (-> % .-target .-value))}]])
 
+(defn composer-message [message]
+  (when message
+    [:div#message
+     (if (posting/success? message)
+       {:class "bg-teal-100 border border-teal-500 max-w-md mx-auto text-teal-900 px-4 py-3 my-2 rounded"}
+       {:class "bg-red-100 border border-red-400 max-w-md mx-auto text-red-700 px-4 py-3 my-2 rounded"})
+     [:h3 {:class "font-bold"} (-> message :kind messages :title)]
+     [:p (-> message :kind messages :body)]
+     (when-let [error (:error message)]
+       [:pre {:class "mt-3 overflow-x-auto"} (:body error)])]))
+
 (defn composer-page [route]
-  (let [counter (atom max-chars)
-        post post-state
-        result result-state]
-    (fn [route]
-      [:<>
-       (when-let [message @result]
-         [:div#message
-          (if (posting/success? message)
-            {:class "bg-teal-100 border border-teal-500 max-w-md mx-auto text-teal-900 px-4 py-3 my-2 rounded"}
-            {:class "bg-red-100 border border-red-400 max-w-md mx-auto text-red-700 px-4 py-3 my-2 rounded"})
-          [:h3 {:class "font-bold"} (-> message :kind messages :title)]
-          [:p (-> message :kind messages :body)]
-          (when-let [error (:error message)]
-            [:pre {:class "mt-3 overflow-x-auto"} (:body error)])])
-       [:div#composer {:class "bg-white clearfix max-w-md mx-auto my-4 p-4 shadow"}
-        [:form {:on-submit (fn [x]
-                             (.preventDefault x)
-                             (-> (posting/create-post @post @settings-state)
-                                 (p/then
-                                   (fn [y]
-                                     (reset! result y)
-                                     (when (posting/success? y)
-                                       (reset! post (post-defaults))
-                                       (reset! counter max-chars))))))}
-         [:span#counter {:class "float-right" } @counter]
-         [:textarea {:class "bg-gray-200 focus:bg-white border border-gray-400 h-56 p-2 w-full"
-                     :value (:content @post)
-                     :placeholder "What do you want to say?"
-                     :on-change (fn [x]
-                                  (reset! counter (-> x .-target .-value (markdown/chars-left max-chars)))
-                                  (swap! post assoc :content (-> x .-target .-value)))}]
-         [composer-input-date post :date "Date" "YYYY-MM-DD HH:MM"]
-         [composer-input-text post :slug "Slug" "Enter a slug"]
-         [composer-input-text post :categories "Categories" "Enter the categories (optional)"]
-         [:button {:class "bg-gray-500 hover:bg-red-700 float-left mx-auto mt-4 px-4 py-2 rounded text-white"
-                   :type "button"
-                   :on-click (fn [x]
-                               (reset! counter max-chars)
-                               (reset! post (post-defaults))
-                               (reset! result nil))} "Reset"]
-         [:button {:class "bg-blue-500 hover:bg-blue-700 float-right mx-auto mt-4 px-4 py-2 rounded text-white"
-                   :type "submit"} "Post"]]]
-       [:footer {:class "text-center"}
-        [:a {:class "text-gray-500 underline"
-             :href (router/href ::settings)} "Settings"]]])))
+  [:<>
+   [composer-message @result-state]
+   [:div#composer {:class "bg-white clearfix max-w-md mx-auto my-4 p-4 shadow"}
+    [:form {:on-submit (fn [x]
+                         (.preventDefault x)
+                         (-> (posting/create-post @post-state @settings-state)
+                             (p/then
+                               (fn [y]
+                                 (reset! result-state y)
+                                 (when (posting/success? y)
+                                   (reset! post-state (post-defaults)))))))}
+     [:span#counter {:class "float-right" } (-> @post-state :content (markdown/chars-left max-chars))]
+     [:textarea {:class "bg-gray-200 focus:bg-white border border-gray-400 h-56 p-2 w-full"
+                 :value (:content @post-state)
+                 :placeholder "What do you want to say?"
+                 :on-change (fn [x]
+                              (swap! post-state assoc :content (-> x .-target .-value)))}]
+     [composer-input-date post-state :date "Date" "YYYY-MM-DD HH:MM"]
+     [composer-input-text post-state :slug "Slug" "Enter a slug"]
+     [composer-input-text post-state :categories "Categories" "Enter the categories (optional)"]
+     [:button {:class "bg-gray-500 hover:bg-red-700 float-left mx-auto mt-4 px-4 py-2 rounded text-white"
+               :type "button"
+               :on-click (fn [x]
+                           (reset! post-state (post-defaults))
+                           (reset! result-state nil))} "Reset"]
+     [:button {:class "bg-blue-500 hover:bg-blue-700 float-right mx-auto mt-4 px-4 py-2 rounded text-white"
+               :type "submit"} "Post"]]]
+   [:footer {:class "text-center"}
+    [:a {:class "text-gray-500 underline"
+         :href (router/href ::settings)} "Settings"]]])
 
 (defn index-page [route]
   (router/replace-state (if (:init? @settings-state) ::composer ::settings)))
 
 (defn app-container []
-  (let [route (:route @app-state)
+  (let [route (-> @app-state :route)
         view (-> route :data :view)]
     [view route]))
 
