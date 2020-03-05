@@ -11,19 +11,30 @@
             [reitit.frontend :as reitit]
             [reitit.frontend.easy :as router]))
 
-;; the maximum number of characters
+;; App constants
+(def gh-client-id "e5ada3b1487b3c99c509")
+(def gh-auth-proxy "https://pondent-github-auth.herokuapp.com/authenticate/")
 (def max-chars 280)
 
 
+;; Messages to display
 (def messages
-  {:success         {:title "Post Created"
-                     :body "Your post was created. How about another?"}
-   :missing-content {:title "Missing Content"
-                     :body "The post did not contain any content."}
-   :missing-slug    {:title "Missing Slug"
-                     :body "The post did not contain a slug."}
-   :save-failure    {:title "Save Failed"
-                     :body "The post was not saved to the repository. The server returned the following response:"}})
+  {:success
+   {:title "Post Created"
+    :body "Your post was created. How about another?"}
+
+   :missing-content
+   {:title "Missing Content"
+    :body "The post did not contain any content."}
+
+   :missing-slug
+   {:title "Missing Slug"
+    :body "The post did not contain a slug."}
+
+   :save-failure
+   {:title "Save Failed"
+    :body "The post was not saved to the repository. The server returned the
+          following response:"}})
 
 
 ;; defaults for a post
@@ -49,6 +60,26 @@
 (defonce result-state (atom nil))
 
 
+(defn error-page [route]
+  [:div {:class "bg-white max-w-md mx-auto my-4 shadow"}
+   [:h2 {:class "bg-red-500 text-white font-bold px-4 py-2"} "Error"]
+   [:p {:class "border border-t-0 border-red-400 rounded-b bg-red-100 px-4 py-3 text-red-700"} "There was an error."]
+   (when-let [error (some-> route :data :error)]
+     [:pre {:class "mt-3 overflow-x-auto"} (:body error)])])
+
+
+(defn authorise-page [route]
+  (let [query (-> route :parameters :query)
+        code (:code query)]
+    (-> (github/auth-token-via-proxy gh-auth-proxy code)
+        (p/then (fn [x]
+                  (if-let [token (:token x)]
+                    (do (swap! settings-state assoc :gh-token token)
+                        (router/replace-state ::settings))
+                    (router/replace-state ::error)))))
+    [:div {:class "bg-white max-w-md mx-auto my-4 p-4 shadow text-center"} "Authorising..."]))
+
+
 (defn settings-item [item-name label placeholder]
   [:<>
     [:label {:class "font-semibold inline-block text-left w-3/12"} label]
@@ -57,6 +88,34 @@
              :value (item-name @settings-state)
              :placeholder placeholder
              :on-change #(swap! settings-state assoc item-name (-> % .-target .-value))}]])
+
+
+(defn settings-github [authd?]
+  (let [pat? (atom false)]
+    (fn [authd?]
+      [:div {:class "clearfix"}
+       (if authd?
+         [:div {:class "float-right my-2 w-9/12"}
+           [:a#authd {:class "bg-green-600 lbtn lbtn-github text-left text-white"
+                      :href (str "https://github.com/settings/connections/applications/" gh-client-id)}
+             [:i {:class "logo"}]
+             [:p {:class "label"} "Authorised with GitHub"]]]
+         (if @pat?
+           [:<>
+            [settings-item :user "User:" "Enter the GitHub user"]
+            [settings-item :password "Token:" "Enter the GitHub access token"]]
+           [:div {:class "float-right my-2 w-9/12"}
+            [:a#authd {:class "bg-black float-right lbtn lbtn-github text-level text-white w-9/12"
+                       :href (github/auth-url gh-client-id)}
+             [:i {:class "logo"}]
+             [:p {:class "label"} "Authorise with GitHub"]]]))
+       (if (not authd?)
+          [:div {:class "float-right my-2 text-left w-9/12"}
+           [:input#pat {:class "mr-2"
+                        :type "checkbox"
+                        :checked @pat?
+                        :on-change #(reset! pat? (not @pat?))}]
+           [:label {:for "pat"} "Use personal access token"]])])))
 
 
 (defn settings-page [route]
@@ -71,9 +130,7 @@
     [settings-item :branch "Branch:" "Enter the repository branch"]
     [settings-item :posts-dir "Directory:" "Enter the posts directory"]
     [settings-item :commit-message "Message:" "Enter the commit message"]
-    [settings-item :user "User:" "Enter the GitHub user"]
-    [settings-item :password "Token:" "Enter the GitHub access token"]
-    [:a {:href "https://github.com/login/oauth/authorize?client_id=e5ada3b1487b3c99c509&scope=repo"} "Authorise on GitHub"]
+    [settings-github (some? (:gh-token @settings-state)) nil]
     [:button {:class "bg-blue-500 hover:bg-blue-700 mx-auto mt-4 px-4 py-2 rounded text-white"
               :type "submit"} "Compose"]]])
 
@@ -150,7 +207,6 @@
 (defn app-container []
   (let [route (-> @app-state :route)
         view (-> route :data :view)]
-    (prn route)
     [view route]))
 
 
@@ -179,6 +235,10 @@
 (def routes
   [["/" {:name ::index
          :view index-page}]
+   ["/error" {:name ::error
+              :view error-page}]
+   ["/authorise" {:name ::authorise
+                  :view authorise-page}]
    ["/composer" {:name ::composer
                  :view composer-page}]
    ["/settings" {:name ::settings

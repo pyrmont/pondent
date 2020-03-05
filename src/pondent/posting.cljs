@@ -70,7 +70,7 @@
           path (post-path (:posts-dir settings) date (:slug post))
           commit-message (:commit-message settings)]
       (-> (github/create-file {:content content :path path :commit-message commit-message}
-                          settings)
+                              settings)
           (p/then (fn [x]
                     (if (= :success (:status x))
                       {:kind :success}
