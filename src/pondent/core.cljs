@@ -1,6 +1,7 @@
 (ns ^:figwheel-hooks pondent.core
   (:require [alandipert.storage-atom :refer [local-storage]]
             [goog.dom :as gdom]
+            [goog.uri.utils :as uri]
             [pondent.github :as github]
             [pondent.markdown :as markdown]
             [pondent.posting :as posting]
@@ -72,6 +73,7 @@
     [settings-item :commit-message "Message:" "Enter the commit message"]
     [settings-item :user "User:" "Enter the GitHub user"]
     [settings-item :password "Token:" "Enter the GitHub access token"]
+    [:a {:href "https://github.com/login/oauth/authorize?client_id=e5ada3b1487b3c99c509&scope=repo"} "Authorise on GitHub"]
     [:button {:class "bg-blue-500 hover:bg-blue-700 mx-auto mt-4 px-4 py-2 rounded text-white"
               :type "submit"} "Compose"]]])
 
@@ -148,6 +150,7 @@
 (defn app-container []
   (let [route (-> @app-state :route)
         view (-> route :data :view)]
+    (prn route)
     [view route]))
 
 
@@ -164,6 +167,15 @@
     (mount el)))
 
 
+(defn move-query-params! []
+  (let [url (.-href js/document.location)
+        path (uri/getPath url)
+        query (uri/getQueryData url)
+        fragment (or (uri/getFragmentEncoded url) "/")]
+    (when query
+      (.replaceState js/history nil "" (str path "#" fragment "?" query)))))
+
+
 (def routes
   [["/" {:name ::index
          :view index-page}]
@@ -174,6 +186,7 @@
 
 
 (defn init! []
+  (move-query-params!)
   (router/start!
     (reitit/router routes)
     (fn [m] (swap! app-state assoc :route m))
