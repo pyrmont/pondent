@@ -96,29 +96,28 @@
 (defn settings-github [authd?]
   (let [pat? (atom false)]
     (fn [authd?]
-      [:div {:class "clearfix"}
-       (if authd?
-         [:div {:class "float-right my-2 w-9/12"}
-           [:a#authd {:class "bg-green-600 lbtn lbtn-github text-left text-white"
-                      :href (str "https://github.com/settings/connections/applications/" gh-client-id)}
-             [:i {:class "logo"}]
-             [:p {:class "label"} "Authorised with GitHub"]]]
-         (if @pat?
-           [:<>
-            [settings-item :user "User:" "Enter the GitHub user"]
-            [settings-item :password "Token:" "Enter the GitHub access token"]]
-           [:div {:class "float-right my-2 w-9/12"}
-            [:a#authd {:class "bg-black float-right lbtn lbtn-github text-level text-white w-9/12"
-                       :href (github/auth-url gh-client-id)}
-             [:i {:class "logo"}]
-             [:p {:class "label"} "Authorise with GitHub"]]]))
-       (if (not authd?)
-          [:div {:class "float-right my-2 text-left w-9/12"}
-           [:input#pat {:class "mr-2"
-                        :type "checkbox"
-                        :checked @pat?
-                        :on-change #(reset! pat? (not @pat?))}]
-           [:label {:for "pat"} "Use personal access token"]])])))
+      [:<>
+       (if @pat?
+         [:<>
+          [settings-item :user "User:" "Enter the GitHub user"]
+          [settings-item :password "Token:" "Enter the GitHub access token"]]
+         [:div {:class "inline-block my-2 w-9/12"}
+          (let [colour  (if authd? "bg-green-600" "bg-black")
+                url     (if authd? (str "https://github.com/settings/connections/applications/" gh-client-id)
+                                  (github/auth-url gh-client-id))
+                message (if authd? "Authorised with GitHub"
+                                  "Authorise with GitHub")]
+            [:a#authd {:class (str colour " lbtn lbtn-github text-left text-white")
+                       :href url}
+              [:i {:class "logo"}]
+              [:p {:class "label"} message]])])
+       [:div {:class "clearfix"}
+        [:div {:class "inline-block my-2 text-left w-9/12"}
+         [:input#pat {:class "mr-2"
+                      :type "checkbox"
+                      :checked @pat?
+                      :on-change #(reset! pat? (not @pat?))}]
+         [:label {:for "pat"} "Use personal access token"]]]])))
 
 
 (defn settings-page [route]
@@ -133,8 +132,8 @@
     [settings-item :branch "Branch:" "Enter the repository branch"]
     [settings-item :posts-dir "Directory:" "Enter the posts directory"]
     [settings-item :commit-message "Message:" "Enter the commit message"]
-    [settings-github (some? (:gh-token @settings-state)) nil]
-    [:button {:class "bg-blue-500 hover:bg-blue-700 mx-auto mt-4 px-4 py-2 rounded text-white"
+    [settings-github (some? (:gh-token @settings-state))]
+    [:button {:class "bg-blue-500 hover:bg-blue-700 mt-4 px-4 py-2 rounded text-white"
               :type "submit"} "Compose"]]])
 
 
