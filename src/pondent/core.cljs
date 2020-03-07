@@ -1,5 +1,6 @@
 (ns ^:figwheel-hooks pondent.core
   (:require [alandipert.storage-atom :refer [local-storage]]
+            [clojure.string :as string]
             [goog.dom :as gdom]
             [goog.uri.utils :as uri]
             [pondent.github :as github]
@@ -139,8 +140,8 @@
 
 (defn composer-input-date [form input-name label placeholder]
   [:<>
-    [:label {:class "font-semibold block mt-3 w-2/12"} label]
-    [:input {:class "bg-gray-200 block focus:bg-white border border-gray-400 p-2 w-full"
+    [:label {:class "font-semibold block mb-1 w-2/12"} label]
+    [:input {:class "bg-gray-200 block focus:bg-white border border-gray-400 mb-3 p-2 w-full"
              :type "text"
              :value (input-name @form)
              :placeholder placeholder
@@ -149,8 +150,8 @@
 
 (defn composer-input-text [form input-name label placeholder]
   [:<>
-    [:label {:class "font-semibold block mt-3 w-2/12"} label]
-    [:input {:class "bg-gray-200 block focus:bg-white border border-gray-400 p-2 w-full"
+    [:label {:class "font-semibold block mb-1 w-2/12"} label]
+    [:input {:class "bg-gray-200 block focus:bg-white border border-gray-400 mb-3 p-2 w-full"
              :type "text"
              :value (input-name @form)
              :placeholder placeholder
@@ -173,30 +174,37 @@
   [:<>
    [composer-message @result-state]
    [:div#composer {:class "bg-white clearfix max-w-md mx-auto my-4 p-4 shadow"}
-    [:form {:on-submit (fn [x]
-                         (.preventDefault x)
-                         (-> (posting/create-post @post-state @settings-state)
-                             (p/then
-                               (fn [y]
-                                 (reset! result-state y)
-                                 (when (posting/success? y)
-                                   (reset! post-state (post-defaults)))))))}
-     [:span#counter {:class "float-right" } (-> @post-state :content (markdown/chars-left max-chars))]
-     [:textarea {:class "bg-gray-200 focus:bg-white border border-gray-400 h-56 p-2 w-full"
-                 :value (:content @post-state)
-                 :placeholder "What do you want to say?"
-                 :on-change (fn [x]
-                              (swap! post-state assoc :content (-> x .-target .-value)))}]
-     [composer-input-date post-state :date "Date" "YYYY-MM-DD HH:MM"]
-     [composer-input-text post-state :slug "Slug" "Enter a slug"]
-     [composer-input-text post-state :categories "Categories" "Enter the categories (optional)"]
-     [:button {:class "bg-gray-500 hover:bg-red-700 float-left mx-auto mt-4 px-4 py-2 rounded text-white"
-               :type "button"
-               :on-click (fn [x]
-                           (reset! post-state (post-defaults))
-                           (reset! result-state nil))} "Reset"]
-     [:button {:class "bg-blue-500 hover:bg-blue-700 float-right mx-auto mt-4 px-4 py-2 rounded text-white"
-               :type "submit"} "Post"]]]
+    (let [chars-left (-> @post-state :content (markdown/chars-left max-chars))
+          char-suffix (if (or (= 1 chars-left) (= -1 chars-left)) " character" " characters")
+          danger? (< chars-left 15)
+          show-title? (or (not (string/blank? (:title @post-state)))
+                          (< chars-left -10))]
+      [:form {:on-submit (fn [x]
+                           (.preventDefault x)
+                           (-> (posting/create-post @post-state @settings-state)
+                               (p/then
+                                 (fn [y]
+                                   (reset! result-state y)
+                                   (when (posting/success? y)
+                                     (reset! post-state (post-defaults)))))))}
+       (if show-title?
+         [composer-input-text post-state :title "Title" "Enter a title"]
+         [:span#counter {:class (str (if danger? "font-semibold text-red-700 ") "float-right mb-1 text-sm")} (str chars-left char-suffix " left")])
+       [:textarea {:class "bg-gray-200 focus:bg-white border border-gray-400 h-56 p-2 w-full"
+                   :value (:content @post-state)
+                   :placeholder "What do you want to say?"
+                   :on-change #(swap! post-state assoc :content (-> % .-target .-value))}]
+       [:p {:class "mb-3 text-gray-500 text-xs"} "You can enter a title once your post is longer than 290 characters."]
+       [composer-input-date post-state :date "Date" "YYYY-MM-DD HH:MM"]
+       [composer-input-text post-state :slug "Slug" "Enter a slug"]
+       [composer-input-text post-state :categories "Categories" "Enter the categories (optional)"]
+       [:button {:class "bg-gray-500 hover:bg-red-700 float-left mx-auto mt-1 px-4 py-2 rounded text-white"
+                 :type "button"
+                 :on-click (fn [x]
+                             (reset! post-state (post-defaults))
+                             (reset! result-state nil))} "Reset"]
+       [:button {:class "bg-blue-500 hover:bg-blue-700 float-right mx-auto mt-1 px-4 py-2 rounded text-white"
+                 :type "submit"} "Post"]])]
    [:footer {:class "text-center"}
     [:a {:class "text-gray-500 underline"
          :href (router/href ::settings)} "Settings"]]])
