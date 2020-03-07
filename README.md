@@ -1,7 +1,7 @@
 # Pondent
 
 Pondent is a client-side utility for posting Markdown-formatted files to GitHub.
-You can use it right now at [pyrmont.github.io/pondent][app].
+You can use it [in your browser][app] right now.
 
 [app]: https://pyrmont.github.io/pondent/
 
