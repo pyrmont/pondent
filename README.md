@@ -22,6 +22,10 @@ Hugo.
 Pondent runs in your browser and requires no installation. However, follow these
 instructions and you can run it locally or own your own server.
 
+Note that if you do want to run it yourself, you'll need to register a personal
+access token. The Pondent application will not be able to authenticate if run on
+a server other than pyrmont.github.io.
+
 ### Requirements
 
 Pondent is a client-side JavaScript application written in ClojureScript. To
