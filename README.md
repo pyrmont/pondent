@@ -66,6 +66,6 @@ Found a bug? I'd love to know about it. The best way is to report them in the
 
 ## Licence
 
-Pondent is released into the public domain. See [LICENSE.md][lc] for more details.
+Pondent is released into the public domain. See [LICENSE][lc] for more details.
 
-[lc]: https://github.com/pyrmont/pondent/blob/master/LICENSE.md
+[lc]: https://github.com/pyrmont/pondent/blob/master/LICENSE
