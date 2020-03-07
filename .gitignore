@@ -16,3 +16,5 @@
 fig.js
 pom.xml
 remote.cljs.edn
+
+resources/public/css/style.css
