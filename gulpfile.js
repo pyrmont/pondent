@@ -1,9 +1,9 @@
 const { src, dest, series, parallel } = require("gulp");
+const { exec, spawn } = require("child_process");
 
 const cleancss = require("gulp-clean-css");
 const concat   = require("gulp-concat");
 const del      = require("del");
-const exec     = require("child_process").exec;
 const purgecss = require("gulp-purgecss");
 const rename   = require("gulp-rename");
 const replace  = require("gulp-replace");
@@ -29,6 +29,11 @@ function compile_js(cb) {
     cb(err);
   });
 }
+
+function compile_js_dev(cb) {
+  spawn("clojure", ["-A:fig:remote"], { stdio: "inherit" }).on("close", cb);
+}
+
 function move_html() {
   return src("resources/public/index.html")
     .pipe(replace(/cljs\-out\/.*?js/, "js/app.min.js"))
@@ -36,6 +41,8 @@ function move_html() {
                   "<link href=\"css/style.min.css\" rel=\"stylesheet\" type=\"text/css\">"))
     .pipe(dest("docs/"));
 }
+
+exports.dev = compile_js_dev
 
 exports.build_css = build_css;
 exports.clean_files = clean_files;
