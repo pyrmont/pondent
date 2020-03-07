@@ -1,0 +1,3 @@
+{:main pondent.core
+ :output-to "docs/js/app.min.js"
+ :optimizations :advanced}
