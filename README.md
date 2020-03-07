@@ -52,7 +52,7 @@ For production
 $ gulp release
 ```
 
-### Limitations
+## Limitations
 
 Pondent does not support the editing of existing files. It also does not support
 image uploading.
