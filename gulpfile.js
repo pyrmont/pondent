@@ -15,7 +15,7 @@ function build_css() {
       content: ["resources/public/index.html", "src/pondent/core.cljs"],
       defaultExtractor: content => content.match(/\w[\w/:-]*/g) || []
     }))
-    .pipe(cleancss())
+    .pipe(cleancss({level: {1: {specialComments: false}}}))
     .pipe(concat("style.css"))
     .pipe(rename({ suffix: ".min" }))
     .pipe(dest("docs/css/"));
