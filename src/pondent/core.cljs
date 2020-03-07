@@ -11,9 +11,12 @@
             [reitit.frontend :as reitit]
             [reitit.frontend.easy :as router]))
 
+;; Build-time defines
+(goog-define gh-client-id "Define in the build file...")
+(goog-define gh-auth-proxy "Define in the build file...")
+
+
 ;; App constants
-(def gh-client-id "e5ada3b1487b3c99c509")
-(def gh-auth-proxy "https://pondent-github-auth.herokuapp.com/authenticate/")
 (def max-chars 280)
 
 
