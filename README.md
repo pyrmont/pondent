@@ -30,12 +30,26 @@ compile it, you'll need:
 - Clojure
 - Node.js
 
-### Console
+### Setup
 
 ```console
 $ git clone git@github.com:pyrmont/pondent.git
 $ cd pondent
 $ npm install
+```
+
+### Compilation
+
+For development:
+
+```console
+$ gulp dev
+```
+
+For production
+
+```console
+$ gulp release
 ```
 
 ### Limitations
