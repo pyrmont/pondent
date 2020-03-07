@@ -1,12 +1,13 @@
 const { src, dest, series, parallel } = require("gulp");
 const { exec, spawn } = require("child_process");
 
-const cleancss = require("gulp-clean-css");
-const concat   = require("gulp-concat");
-const del      = require("del");
-const purgecss = require("gulp-purgecss");
-const rename   = require("gulp-rename");
-const replace  = require("gulp-replace");
+const cleancss   = require("gulp-clean-css");
+const concat     = require("gulp-concat");
+const del        = require("del");
+const postcss    = require("gulp-postcss");
+const purgecss   = require("gulp-purgecss");
+const rename     = require("gulp-rename");
+const replace    = require("gulp-replace");
 
 function build_css() {
   return src("resources/public/css/*.css")
@@ -18,6 +19,15 @@ function build_css() {
     .pipe(concat("style.css"))
     .pipe(rename({ suffix: ".min" }))
     .pipe(dest("docs/css/"));
+}
+
+function build_css_dev() {
+  return src("resources/css/tailwind.css")
+    .pipe(postcss([require("postcss-import"),
+                   require("tailwindcss")]))
+    .pipe(src("resources/css/github.css"))
+    .pipe(concat("style.css"))
+    .pipe(dest("resources/public/css/"));
 }
 
 function clean_files() {
@@ -42,11 +52,15 @@ function move_html() {
     .pipe(dest("docs/"));
 }
 
-exports.dev = compile_js_dev
+exports.dev = series(build_css_dev, compile_js_dev);
+exports.release = series(clean_files, parallel(compile_js,
+                                               series(build_css_dev, build_css),
+                                               move_html));
 
 exports.build_css = build_css;
+exports.build_css_dev = build_css_dev;
 exports.clean_files = clean_files;
 exports.compile_js = compile_js;
 exports.move_html = move_html;
 
-exports.default = series(clean_files, parallel(compile_js, build_css, move_html));
+exports.default = exports.release;
