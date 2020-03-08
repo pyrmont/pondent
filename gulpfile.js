@@ -1,4 +1,4 @@
-const { src, dest, series, parallel } = require("gulp");
+const { src, dest, series, parallel, watch } = require("gulp");
 const { exec, spawn } = require("child_process");
 
 const cleancss   = require("gulp-clean-css");
@@ -8,6 +8,8 @@ const postcss    = require("gulp-postcss");
 const purgecss   = require("gulp-purgecss");
 const rename     = require("gulp-rename");
 const replace    = require("gulp-replace");
+
+var watcher;
 
 function build_css() {
   return src("resources/public/css/*.css")
@@ -41,7 +43,15 @@ function compile_js(cb) {
 }
 
 function compile_js_dev(cb) {
-  spawn("clojure", ["-A:fig:remote"], { stdio: "inherit" }).on("close", cb);
+  var build_name;
+  let i = process.argv.indexOf("dev");
+  if (i == -1 || process.argv.length == (i + 1) || process.argv[i + 1].slice(0, 2) !== "--") {
+    build_name = "build";
+  } else {
+    build_name = process.argv[i + 1].slice(2);
+  }
+
+  spawn("clojure", ["-A:fig:" + build_name], { stdio: "inherit" }).on("close", cb);
 }
 
 function move_html() {
@@ -52,7 +62,19 @@ function move_html() {
     .pipe(dest("docs/"));
 }
 
-exports.dev = series(build_css_dev, compile_js_dev);
+function stop_watch(cb) {
+  watcher.watch.close();
+  watcher.cb();
+  cb();
+}
+
+function watch_css(cb) {
+  watcher = { watch: watch("resources/css/*.css", build_css_dev),
+              cb: cb };
+}
+
+exports.dev = parallel(series(build_css_dev, compile_js_dev, stop_watch),
+                       watch_css);
 exports.release = series(clean_files, parallel(compile_js,
                                                series(build_css_dev, build_css),
                                                move_html));
