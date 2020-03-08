@@ -14,7 +14,7 @@ var watcher;
 function build_css() {
   return src("resources/public/css/*.css")
     .pipe(purgecss({
-      content: ["resources/public/index.html", "src/pondent/core.cljs"],
+      content: ["resources/public/index.html", "src/pondent/**/*.cljs"],
       defaultExtractor: content => content.match(/\w[\w/:-]*/g) || []
     }))
     .pipe(cleancss({level: {1: {specialComments: false}}}))
