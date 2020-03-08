@@ -6,13 +6,15 @@
             [reitit.frontend.easy :as router]))
 
 
+;; defaults for the settings
+(def settings-defaults
+  {:owner nil :repo nil :branch "master" :posts-dir nil
+   :commit-message "Add a post" :user nil :password nil :init? false})
+
+
 ;; the settings
 (defonce settings-state
-  (local-storage
-    (atom {:owner nil :repo nil :branch "master" :posts-dir nil
-           :commit-message "Add a post" :user nil :password nil
-           :init? false})
-    :settings-state))
+  (local-storage (atom settings-defaults) :settings-state))
 
 
 (defn settings-item [item-name label placeholder]
@@ -69,5 +71,9 @@
     [settings-item :posts-dir "Directory:" "Enter the posts directory"]
     [settings-item :commit-message "Message:" "Enter the commit message"]
     [settings-github]
+    [:button {:class "bg-gray-500 hover:bg-red-700 float-left mx-auto mt-4 px-4 py-2 rounded text-white"
+              :type "button"
+              :on-click (fn [x]
+                          (reset! settings-state settings-defaults))} "Reset"]
     [:button {:class "bg-blue-500 hover:bg-blue-700 mt-4 px-4 py-2 rounded text-white"
               :type "submit"} "Compose"]]])
