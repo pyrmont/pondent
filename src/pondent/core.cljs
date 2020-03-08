@@ -94,9 +94,13 @@
              :on-change #(swap! settings-state assoc item-name (-> % .-target .-value))}]])
 
 
-(defn settings-github [authd?]
-  (let [pat? (atom false)]
-    (fn [authd?]
+(defn settings-github []
+  (let [authd? (some? (:gh-token @settings-state))
+        pat? (atom false)]
+    (if authd?
+      (-> (github/authd? (:gh-token @settings-state))
+          (p/then #(if-not % (swap! settings-state dissoc :gh-token)))))
+    (fn []
       [:<>
        (if @pat?
          [:<>
@@ -133,7 +137,7 @@
     [settings-item :branch "Branch:" "Enter the repository branch"]
     [settings-item :posts-dir "Directory:" "Enter the posts directory"]
     [settings-item :commit-message "Message:" "Enter the commit message"]
-    [settings-github (some? (:gh-token @settings-state))]
+    [settings-github]
     [:button {:class "bg-blue-500 hover:bg-blue-700 mt-4 px-4 py-2 rounded text-white"
               :type "submit"} "Compose"]]])
 

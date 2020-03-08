@@ -79,6 +79,15 @@
 
 ; ;; Authorisation functions
 
+
+(defn authd?
+  "Check whether the authorisation `gh-token` is valid."
+  [gh-token]
+  (-> (github-url nil)
+      (GET "" {:token gh-token})
+      (p/then #(= 200 (:status %)))))
+
+
 (defn auth-url
   "Make the GitHub authorisation URL."
   [client-id]
