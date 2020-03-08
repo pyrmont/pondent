@@ -111,7 +111,4 @@
                              (reset! post-state (post-defaults))
                              (reset! result-state nil))} "Reset"]
        [:button {:class "bg-blue-500 hover:bg-blue-700 float-right mx-auto mt-1 px-4 py-2 rounded text-white"
-                 :type "submit"} "Post"]])]
-   [:footer {:class "text-center"}
-    [:a {:class "text-gray-500 underline"
-         :href (router/href :pondent.core/settings)} "Settings"]]])
+                 :type "submit"} "Post"]])]])

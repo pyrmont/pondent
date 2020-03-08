@@ -1,6 +1,7 @@
 (ns ^:figwheel-hooks pondent.core
   (:require [goog.dom :as gdom]
             [goog.uri.utils :as uri]
+            [pondent.pages.about :as about]
             [pondent.pages.authorise :as authorise]
             [pondent.pages.composer :as composer]
             [pondent.pages.error :as error]
@@ -23,7 +24,17 @@
 (defn app-container []
   (let [route (-> @app-state :route)
         view  (-> route :data :view)]
-    [view route]))
+    [:div#frame
+     [view route]
+     [:footer {:class "text-center"}
+      [:a {:class "mx-4 text-gray-500 underline"
+           :href (router/href ::about)} "About"]
+      [:a {:class "mx-4 text-gray-500 underline"
+           :href (router/href ::composer)} "Composer"]
+      [:a {:class "mx-4 text-gray-500 underline"
+           :href (router/href ::settings)} "Settings"]
+      [:a {:class "mx-4 text-gray-500 underline"
+           :href "https://github.com/pyrmont/pondent/"} "Source"]]]))
 
 
 (defn mount [el]
@@ -51,6 +62,8 @@
 (def routes
   [["/"          {:name ::index
                   :view index/index-page}]
+   ["/about"     {:name ::about
+                  :view about/about-page}]
    ["/error"     {:name ::error
                   :view error/error-page}]
    ["/authorise" {:name ::authorise
