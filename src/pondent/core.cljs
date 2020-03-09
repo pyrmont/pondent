@@ -25,8 +25,9 @@
   (let [route (-> @app-state :route)
         view  (-> route :data :view)]
     [:div#frame
+     [:h1 {:class "font-bold mt-3 text-center text-gray-600 text-4xl"} "Pondent"]
      [view route]
-     [:footer {:class "text-center"}
+     [:footer {:class "pb-6 text-center"}
       [:a {:class "mx-4 text-gray-500 underline"
            :href (router/href ::about)} "About"]
       [:a {:class "mx-4 text-gray-500 underline"
