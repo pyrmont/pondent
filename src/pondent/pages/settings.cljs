@@ -42,10 +42,10 @@
          [:div {:class "inline-block my-2 w-9/12"}
           (let [colour  (if authd? "bg-green-600" "bg-black")
                 url     (if authd? (str "https://github.com/settings/connections/applications/" pondent.core/gh-client-id)
-                                  (github/auth-url pondent.core/gh-client-id))
+                                   (github/auth-url pondent.core/gh-client-id))
                 message (if authd? "Authorised with GitHub"
                                    "Authorise with GitHub")]
-            [:a#authd {:class (str colour " lbtn lbtn-github text-left text-white")
+            [:a#authd {:class (str colour " border-gray-300 lbtn lbtn-github")
                        :href url}
               [:i {:class "logo"}]
               [:p {:class "label"} message]])])
