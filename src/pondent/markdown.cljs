@@ -1,5 +1,5 @@
 (ns pondent.markdown
-  (:require [clojure.string :as str]))
+  (:require [clojure.string :as string]))
 
 
 ;; Character counts
@@ -14,7 +14,7 @@
     (= "*" open)  (= "*" close)
     (= "_" open)  (= "_" close)
     (= "`" open)  (= "`" close)
-    (= "[" open)  (str/ends-with? close ")")
+    (= "[" open)  (string/ends-with? close ")")
     :else false))
 
 
@@ -23,7 +23,7 @@
   [open close]
   (if (not (meta-match? open close))
     nil
-    (if (str/starts-with? close "](")
+    (if (string/starts-with? close "](")
       23 ;; This is the Twitter short link maximum length
       0)))
 
@@ -34,15 +34,15 @@
   [text start]
   (let [remainder (subs text start)]
     (cond
-      (str/starts-with? remainder "**") (+ 2 start)
-      (str/starts-with? remainder "__") (+ 2 start)
-      (str/starts-with? remainder "*")  (+ 1 start)
-      (str/starts-with? remainder "_")  (+ 1 start)
-      (str/starts-with? remainder "`")  (+ 1 start)
-      (str/starts-with? remainder "[")  (+ 1 start)
-      (str/starts-with? remainder "](") (if-let [next-pos (str/index-of text ")" start)]
-                                          (+ 1 next-pos)
-                                          start)
+      (string/starts-with? remainder "**") (+ 2 start)
+      (string/starts-with? remainder "__") (+ 2 start)
+      (string/starts-with? remainder "*")  (+ 1 start)
+      (string/starts-with? remainder "_")  (+ 1 start)
+      (string/starts-with? remainder "`")  (+ 1 start)
+      (string/starts-with? remainder "[")  (+ 1 start)
+      (string/starts-with? remainder "](") (if-let [next-pos (string/index-of text ")" start)]
+                                             (+ 1 next-pos)
+                                             start)
       :else start)))
 
 
@@ -66,3 +66,27 @@
   "Calculate the number of characters left."
   [text max-chars]
   (- max-chars (num-plain-chars text)))
+
+
+;; Links
+
+(defn image-ref
+  "Get the reference for an image."
+  ([url]
+   (image-ref url "alt text"))
+  ([url alt-text]
+   (str "![" alt-text "](" url ")")))
+
+
+(defn link-ref
+  "Get the reference for a link."
+  ([url]
+   (image-ref url "link text"))
+  ([url link-text]
+   (str "[" link-text "](" url ")")))
+
+
+(defn ref-pattern
+  "Get a pattern for the `url`."
+  [url]
+  (re-pattern (str " ?!?\\[.*?\\]\\(" url "\\)")))
