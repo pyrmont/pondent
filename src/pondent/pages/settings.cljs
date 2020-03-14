@@ -1,5 +1,6 @@
 (ns pondent.pages.settings
   (:require [alandipert.storage-atom :refer [local-storage]]
+            [clojure.string :as string]
             [pondent.github :as github]
             [promesa.core :as p]
             [reagent.core :as reagent :refer [atom]]
@@ -18,6 +19,12 @@
   (local-storage (atom settings-defaults) :settings-state))
 
 
+(defn update-gh-token! [oauth-token?]
+  (if oauth-token?
+    (-> (github/authd? (:gh-token @settings-state))
+        (p/then #(if-not % (swap! settings-state dissoc :gh-token))))))
+
+
 (defn settings-item [item-name label placeholder]
   [:<>
     [:label {:class "font-semibold inline-block text-left w-3/12"} label]
@@ -29,23 +36,21 @@
 
 
 (defn settings-github []
-  (let [authd? (some? (:gh-token @settings-state))
-        pat? (atom false)]
-    (if authd?
-      (-> (github/authd? (:gh-token @settings-state))
-          (p/then #(if-not % (swap! settings-state dissoc :gh-token)))))
+  (let [oauth-token? (not (string/blank? (:gh-token @settings-state)))
+        personal-token? (atom (not (string/blank? (:gh-user @settings-state))))]
+    (update-gh-token! oauth-token?)
     (fn []
       [:<>
-       (if @pat?
+       (if @personal-token?
          [:<>
-          [settings-item :user "User:" "Enter the GitHub user"]
-          [settings-item :password "Token:" "Enter the GitHub access token"]]
+          [settings-item :gh-user "User:" "Enter the GitHub user"]
+          [settings-item :gh-password "Token:" "Enter the GitHub access token"]]
          [:div {:class "inline-block my-2 w-9/12"}
-          (let [colour  (if authd? "bg-green-600" "bg-black")
-                url     (if authd? (github/app-url pondent.core/gh-client-id)
-                                   (github/auth-url pondent.core/gh-client-id))
-                message (if authd? "Authorised with GitHub"
-                                   "Authorise with GitHub")]
+          (let [colour  (if oauth-token? "bg-green-600" "bg-black")
+                url     (if oauth-token? (github/app-url pondent.core/gh-client-id)
+                                         (github/auth-url pondent.core/gh-client-id))
+                message (if oauth-token? "Authorised with GitHub"
+                                         "Authorise with GitHub")]
             [:a#authd {:class (str colour " border-gray-300 lbtn lbtn-github")
                        :href url}
               [:i {:class "logo"}]
@@ -54,8 +59,8 @@
         [:div {:class "inline-block my-2 text-left w-9/12"}
          [:input#pat {:class "mr-2"
                       :type "checkbox"
-                      :checked @pat?
-                      :on-change #(reset! pat? (not @pat?))}]
+                      :checked @personal-token?
+                      :on-change #(swap! personal-token? not)}]
          [:label {:for "pat"} "Use personal access token"]]]])))
 
 

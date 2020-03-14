@@ -68,11 +68,11 @@
 (defn create-file
   "Create a file in the GitHub repository in one step."
   [{:keys [content path commit-message] :as data}
-   {:keys [owner repo user password gh-token] :as settings}]
+   {:keys [owner repo gh-user gh-password gh-token] :as settings}]
   (let [url     (github-url (str "/repos/" owner "/" repo "/contents/" path))
         payload (map->body {:message commit-message
                             :content content})
-        opts    {:token gh-token :user user :password password}]
+        opts    {:token gh-token :user gh-user :password gh-password}]
     (-> (PUT url payload opts)
         (p/then #(process-create-response %)))))
 
