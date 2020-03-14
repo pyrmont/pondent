@@ -77,8 +77,7 @@
         (p/then #(process-create-response %)))))
 
 
-; ;; Authorisation functions
-
+;; Authorisation functions
 
 (defn authd?
   "Check whether the authorisation `gh-token` is valid."
