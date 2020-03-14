@@ -87,6 +87,12 @@
       (p/then #(= 200 (:status %)))))
 
 
+(defn app-url
+  "Make the GitHub application URL."
+  [client-id]
+  (str "https://github.com/settings/connections/applications/" client-id))
+
+
 (defn auth-url
   "Make the GitHub authorisation URL."
   [client-id]
