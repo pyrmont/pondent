@@ -108,7 +108,7 @@
                       (format-post date (:title post) (:categories post))
                       base64/encodeString)
           path (post-path (:posts-dir settings) date (:slug post))
-          commit-message (:commit-message settings)]
+          commit-message (:posts-commit settings)]
       (-> (github/create-file {:content content :path path :commit-message commit-message}
                               settings)
           (p/then (fn [x]
@@ -122,8 +122,8 @@
   [file settings]
   (let [content (:content file)
         path    (file-path (str (:uploads-dir settings) (:year file) "/") (:filename file))
-        message "Add a file"]
-    (-> (github/create-file {:content content :path path :commit-message message}
+        commit-message (:uploads-commit settings)]
+    (-> (github/create-file {:content content :path path :commit-message commit-message}
                             settings)
         (p/then (fn [x]
                   (if (= :success (:status x))

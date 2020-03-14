@@ -35,6 +35,14 @@
              :on-change #(swap! settings-state assoc item-name (-> % .-target .-value))}]])
 
 
+(defn settings-title [title-name]
+  [:h2 {:class "font-bold mb-2 text-gray-500 text-center uppercase"} title-name])
+
+
+(defn settings-section [section-name]
+  [:h3 {:class "border-gray-200 border-t-2 font-bold mb-2 mt-4 pt-4 text-gray-500 text-center text-sm uppercase"} section-name])
+
+
 (defn settings-github []
   (let [oauth-token? (not (string/blank? (:gh-token @settings-state)))
         personal-token? (atom (not (string/blank? (:gh-user @settings-state))))]
@@ -45,7 +53,7 @@
          [:<>
           [settings-item :gh-user "User:" "Enter the GitHub user"]
           [settings-item :gh-password "Token:" "Enter the GitHub access token"]]
-         [:div {:class "inline-block my-2 w-9/12"}
+         [:div {:class "mx-auto my-2 w-9/12"}
           (let [colour  (if oauth-token? "bg-green-600" "bg-black")
                 url     (if oauth-token? (github/app-url pondent.core/gh-client-id)
                                          (github/auth-url pondent.core/gh-client-id))
@@ -70,14 +78,18 @@
                         (.preventDefault x)
                         (swap! settings-state assoc :init? true)
                         (router/push-state :pondent.core/composer))}
-    [:h2 {:class "mb-2 text-center text-xl"} "Settings"]
+    [settings-title "Settings"]
     [settings-item :owner "Owner:" "Enter the repository owner"]
     [settings-item :repo "Repo:" "Enter the repository name"]
     [settings-item :branch "Branch:" "Enter the repository branch"]
-    [settings-item :posts-dir "Posts:" "Enter the posts directory"]
-    [settings-item :uploads-dir "Uploads:" "Enter the uploads directory"]
-    [settings-item :uploads-url "Uploads URL:" "Enter the uploads URL"]
-    [settings-item :commit-message "Message:" "Enter the commit message"]
+    [settings-section "Posts"]
+    [settings-item :posts-dir "Directory:" "Enter the posts directory"]
+    [settings-item :posts-commit "Commit:" "Enter the commit message"]
+    [settings-section "Uploads"]
+    [settings-item :uploads-dir "Directory:" "Enter the uploads directory"]
+    [settings-item :uploads-url "URL:" "Enter the uploads URL"]
+    [settings-item :uploads-commit "Commit:" "Enter the commit message"]
+    [settings-section "GitHub"]
     [settings-github]
     [:button {:class "bg-gray-500 hover:bg-red-700 float-left mx-auto mt-4 px-4 py-2 rounded text-white"
               :type "button"
