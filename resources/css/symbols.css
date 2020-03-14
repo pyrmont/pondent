@@ -1,0 +1,7 @@
+.check::before {
+  color: green;
+  content: " \2611"; /* Hexadecimal for Unicode Leftwards white arrow*/
+  display: inline-block;
+  margin-right: 5px;
+}
+

@@ -27,7 +27,8 @@ function build_css_dev() {
   return src("resources/css/tailwind.css")
     .pipe(postcss([require("postcss-import"),
                    require("tailwindcss")]))
-    .pipe(src("resources/css/github.css"))
+    .pipe(src(["resources/css/github.css",
+               "resources/css/symbols.css"]))
     .pipe(concat("style.css"))
     .pipe(dest("resources/public/css/"));
 }
