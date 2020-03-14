@@ -8,8 +8,9 @@
 
 ;; defaults for the settings
 (def settings-defaults
-  {:owner nil :repo nil :branch "master" :posts-dir nil
-   :commit-message "Add a post" :user nil :password nil :init? false})
+  {:owner nil :repo nil :branch "master" :posts-dir nil :uploads-dir nil
+   :uploads-url nil :commit-message "Add a post" :user nil :password nil
+   :init? false})
 
 
 ;; the settings
@@ -68,7 +69,9 @@
     [settings-item :owner "Owner:" "Enter the repository owner"]
     [settings-item :repo "Repo:" "Enter the repository name"]
     [settings-item :branch "Branch:" "Enter the repository branch"]
-    [settings-item :posts-dir "Directory:" "Enter the posts directory"]
+    [settings-item :posts-dir "Posts:" "Enter the posts directory"]
+    [settings-item :uploads-dir "Uploads:" "Enter the uploads directory"]
+    [settings-item :uploads-url "Uploads URL:" "Enter the uploads URL"]
     [settings-item :commit-message "Message:" "Enter the commit message"]
     [settings-github]
     [:button {:class "bg-gray-500 hover:bg-red-700 float-left mx-auto mt-4 px-4 py-2 rounded text-white"
