@@ -8,6 +8,7 @@
             [pondent.pages.index :as index]
             [pondent.pages.settings :as settings]
             [reagent.core :as reagent :refer [atom]]
+            [reagent.dom :as rdom]
             [reitit.frontend :as reitit]
             [reitit.frontend.easy :as router]))
 
@@ -39,7 +40,7 @@
 
 
 (defn mount [el]
-  (reagent/render [app-container] el))
+  (rdom/render [app-container] el))
 
 
 (defn get-app-element []
