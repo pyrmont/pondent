@@ -13,7 +13,6 @@
 .repl
 
 *.jar
-fig.js
 pom.xml
 remote.cljs.edn
 
