@@ -1,4 +1,3 @@
-^{:watch-dirs ["test" "src"]
-  :css-dirs ["resources/public/css"]
-  :auto-testing true}
+^{:watch-dirs ["src"]
+  :css-dirs ["resources/public/css"]}
 {:main pondent.core}
