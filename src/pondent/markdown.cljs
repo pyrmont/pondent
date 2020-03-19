@@ -15,6 +15,7 @@
     (= "_" open)  (= "_" close)
     (= "`" open)  (= "`" close)
     (= "[" open)  (string/ends-with? close ")")
+    (= "![" open) (string/ends-with? close ")")
     :else false))
 
 
@@ -40,6 +41,7 @@
       (string/starts-with? remainder "_")  (+ 1 start)
       (string/starts-with? remainder "`")  (+ 1 start)
       (string/starts-with? remainder "[")  (+ 1 start)
+      (string/starts-with? remainder "![") (+ 2 start)
       (string/starts-with? remainder "](") (if-let [next-pos (string/index-of text ")" start)]
                                              (+ 1 next-pos)
                                              start)
