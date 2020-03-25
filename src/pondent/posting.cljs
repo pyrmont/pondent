@@ -1,5 +1,6 @@
 (ns pondent.posting
   (:require [clojure.string :as string]
+            [goog.crypt :as crypt]
             [goog.crypt.base64 :as base64]
             [goog.string :as gstring]
             [pondent.file :as file]
@@ -106,7 +107,8 @@
                    (time/now))
           content (-> (:content post)
                       (format-post date (:title post) (:categories post))
-                      base64/encodeString)
+                      crypt/stringToUtf8ByteArray
+                      base64/encodeByteArray)
           path (post-path (:posts-dir settings) date (:slug post))
           commit-message (:posts-commit settings)]
       (-> (github/create-file {:content content :path path :commit-message commit-message}
