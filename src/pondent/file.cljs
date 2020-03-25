@@ -1,9 +1,34 @@
 (ns pondent.file
-  (:require [clojure.string :as string]
+  (:require [clojure.spec.alpha :as s]
+            [clojure.string :as string]
             [goog.string :as gstring]
             [goog.string.path :as path]
             [pondent.time :as time]
             [promesa.core :as p]))
+
+
+;; Specs
+
+(def url-regex #"https?://[\w./]+")
+
+
+(s/def ::file #(instance? js/File %))
+(s/def ::filename string?)
+(s/def ::year (s/and string? #(re-matches #"\d{4}" %)))
+(s/def ::ext string?)
+(s/def ::url (s/and string? #(re-matches url-regex %)))
+(s/def ::uploads-url ::url)
+(s/def ::promise #(instance? js/Promise %))
+
+
+(s/fdef filename :args (s/cat :file ::file) :ret ::filename)
+(s/fdef year :args (s/cat :file ::file) :ret (s/nilable ::year))
+(s/fdef extension :args (s/cat :file ::file :lower-case? (s/? boolean?)) :ret ::ext)
+(s/fdef hashed-name :args (s/cat :file ::file) :ret ::filename)
+(s/fdef url :args (s/cat :file ::file :settings (s/keys :req-un [::uploads-url])) :ret ::url)
+(s/fdef image? :args (s/cat :file ::file) :ret boolean?)
+(s/fdef movie? :args (s/cat :file ::file) :ret boolean?)
+(s/fdef read-async :args (s/cat :file ::file) :ret ::promise)
 
 
 ;; Independent properties
