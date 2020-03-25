@@ -6,12 +6,18 @@
 
 ;; Specs
 
-(def iso-8601 #"/d{4}-[0-1]/d-[0-3]/dT[0-2]/d:[0-5]/d:[0-5]/d[+-][0-2]/d:[0-5]/d")
+(def iso-8601 #"\d{4}-[0-1]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d[+-][0-2]\d:[0-5]\d")
+
 
 (s/def ::date #(instance? goog.date.DateTime %))
 (s/def ::date-pattern string?)
 (s/def ::date-iso-8601 (s/and string? #(re-matches iso-8601 %)))
 (s/def ::time-offset (s/double-in :min -24.0 :max 24.0 :NaN? false :infinite? false))
+
+
+(s/fdef date->str :args (s/cat :date ::date :patt (s/? ::date-pattern)) :ret string?)
+(s/fdef now :ret ::date)
+(s/fdef str->date :args (s/cat :s ::date-iso-8601 :offset (s/? ::time-offset))) :ret (s/nilable ::date)
 
 
 ;; Date conversions
@@ -24,18 +30,11 @@
   ([date patt]
    (.format (new goog.i18n.DateTimeFormat patt) date)))
 
-(s/fdef date->str
-  :args (s/cat :date ::date :patt (s/? ::date-pattern))
-  :ret  string?)
-
 
 (defn now
   "Returns the current time."
   []
   (goog.date.DateTime.))
-
-(s/fdef now
-  :ret ::date)
 
 
 (defn str->date
@@ -50,7 +49,3 @@
        (->> millis
             (+ (* offset 60 60 1000))
             (.fromTimestamp goog.date.DateTime))))))
-
-(s/fdef str->date
-  :args (s/cat :s ::date-iso-8601 :offset (s/? ::time-offset))
-  :ret  (s/nilable ::date))
