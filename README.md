@@ -8,8 +8,8 @@ You can use it [in your browser][app] right now.
 ## Rationale
 
 A static site is a great way to make your site safer and more performant.
-Combine it with GitHub and you have a version-controlled you can access from
-anywhere.
+Combine it with GitHub and you have a version-controlled directory you can
+access from anywhere.
 
 The problem is how to update it?
 
@@ -20,7 +20,7 @@ Hugo.
 ## Installation
 
 Pondent runs in your browser and requires no installation. However, follow these
-instructions and you can run it locally or own your own server.
+instructions and you can run it locally or on your own server.
 
 Note that if you do want to run it yourself, you'll need to register a personal
 access token. The Pondent application will not be able to authenticate if run on
@@ -67,8 +67,7 @@ $ gulp release
 
 ## Limitations
 
-Pondent does not support the editing of existing files. It also does not support
-image uploading.
+Pondent does not support the editing of existing files.
 
 ## Bugs
 
