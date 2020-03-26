@@ -10,7 +10,7 @@
                       {com.bhauman/rebel-readline-cljs {:mvn/version "0.1.4"}
                        ; com.bhauman/figwheel-main {:mvn/version "0.2.3"}}
                        com.bhauman/figwheel-main {:git/url "https://github.com/pyrmont/figwheel-main" :sha "bfb80e9de31baddae4f2eb886f631d45dfd9e43e"}}
-                     :extra-paths ["target"]}
+                     :extra-paths ["target" "test"]}
            :build   {:main-opts ["-m" "figwheel.main" "-b" "dev" "-r"]}
            :min     {:main-opts ["-m" "figwheel.main" "-O" "advanced" "-bo" "dev"]}
            :release {:main-opts ["-m" "figwheel.main" "-bo" "release"]}

@@ -1,6 +1,5 @@
 (ns pondent.posting
-  (:require [clojure.spec.alpha :as s]
-            [clojure.string :as string]
+  (:require [clojure.string :as string]
             [goog.crypt :as crypt]
             [goog.crypt.base64 :as base64]
             [goog.string :as gstring]
@@ -8,37 +7,6 @@
             [pondent.github :as github]
             [pondent.time :as time]
             [promesa.core :as p]))
-
-
-;; Specs
-
-(def filename-regex #"[^/]")
-(def url-regex #"https?://[\w.-]+[\w./%#?&=-]+")
-
-
-(s/def ::content string?)
-(s/def ::date #(instance? goog.date.DateTime %))
-(s/def ::filename (s/and string? #(re-matches filename-regex %)))
-(s/def ::path string?)
-(s/def ::promise #(instance? js/Promise %))
-(s/def ::settings (s/keys :req-un [::owner ::repo ::gh-user ::gh-password ::gh-token]))
-(s/def ::slug string?)
-(s/def ::url (s/and string? #(re-matches url-regex %)))
-
-
-(s/fdef file-path :args (s/cat :dir ::path :filename ::filename) :ret ::path)
-(s/fdef format-date :args (s/cat :date ::date) :ret string?)
-(s/fdef format-title :args (s/cat :title (s/nilable string?)) :ret (s/nilable string?))
-(s/fdef format-categories :args (s/cat :categories (s/nilable string?)) :ret (s/nilable string?))
-(s/fdef format-body :args (s/cat :body ::content) :ret string?)
-(s/fdef format-post :args (s/cat :body ::content :date ::date :title (s/nilable string?) :categories (s/nilable string?)) :ret string?)
-(s/fdef input-errors :args (s/keys :req-un [::content ::slug]) :ret map?)
-(s/fdef loose-images :args (s/cat :files (s/nilable seq?) :content (s/nilable ::content) :settings :settings) :ret string?)
-(s/fdef post-path :args (s/cat :dir ::path :date ::date :slug ::slug) :ret ::path)
-(s/fdef success? :args (s/cat :result (s/nilable map?)) :ret boolean?)
-(s/fdef uploaded? :args (s/cat :result (s/nilable map?)) :ret boolean?)
-(s/fdef create-post :args (s/cat :post map? :settings ::settings) :ret ::promise)
-(s/fdef create-file :args (s/cat :file map? :settings ::settings) :ret ::promise)
 
 
 ;; General functions
