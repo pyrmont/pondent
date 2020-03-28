@@ -230,6 +230,6 @@
                  :type "button"
                  :on-click reset-states!} "Reset"]
        [:button {:class (str "bg-blue-500 hover:bg-blue-700 float-right mx-auto mt-1 px-4 py-2 rounded text-white"
-                             " disabled:opacity-50 disabled:cursor-not-allowed")
+                             " disabled:opacity-50 disabled:cursor-default")
                  :disabled disabled?
                  :type "submit"} "Post"]])]])
