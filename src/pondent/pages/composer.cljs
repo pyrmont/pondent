@@ -53,15 +53,26 @@
    :categories nil})
 
 
+;; defaults for a form
+(defn form-defaults []
+  {:disabled? false})
+
+
 (defonce post-state (atom (post-defaults)))
 (defonce result-state (atom nil))
 (defonce files-state (atom #{}))
+(defonce form-state (atom (form-defaults)))
 
 
 (defn reset-states! []
   (reset! post-state (post-defaults))
   (reset! result-state nil)
-  (reset! files-state #{}))
+  (reset! files-state #{})
+  (reset! form-state (form-defaults)))
+
+
+(defn disable-form! []
+  (swap! form-state assoc :disabled? true))
 
 
 (defn insert-into-post! [file]
@@ -102,8 +113,9 @@
         data        (assoc post :content (str content images-html))]
     (-> (posting/create-post data settings)
         (p/then (fn [x]
-                  (when (posting/success? x)
-                    (reset-states!))
+                  (if (posting/success? x)
+                    (reset-states!)
+                    (swap! form-state assoc :disabled? false))
                   (reset! result-state x))))))
 
 
@@ -191,25 +203,30 @@
           char-suffix (if (or (= 1 chars-left) (= -1 chars-left)) " character" " characters")
           danger? (< chars-left 15)
           show-title? (or (not (string/blank? (:title @post-state)))
-                          (< chars-left -10))]
+                          (< chars-left -10))
+          disabled? (:disabled? @form-state)]
       [:form {:on-submit (fn [x]
                            (.preventDefault x)
+                           (disable-form!)
                            (p/do! (upload-files!)
                                   (upload-post!)))}
-       (if show-title?
-         [composer-input-text post-state :title "Title" "Enter a title"]
-         [:span#counter {:class (str (if danger? "font-semibold text-red-700 ") "float-right mb-1 text-sm")} (str chars-left char-suffix " left")])
-       [:textarea {:class "bg-gray-200 focus:bg-white border border-gray-400 h-56 p-2 w-full"
-                   :value (:content @post-state)
-                   :placeholder "What do you want to say?"
-                   :on-change #(swap! post-state assoc :content (-> % .-target .-value))}]
-       [:p {:class "mb-3 text-gray-500 text-xs"} (:title help)]
-       [composer-input-files post-state :image "Attachment" "Browse..."]
-       [composer-input-date post-state :date "Date" "YYYY-MM-DD HH:MM"]
-       [composer-input-text post-state :slug "Slug" "Enter a slug"]
-       [composer-input-text post-state :categories "Categories" "Enter the categories (optional)"]
+       [:fieldset {:disabled disabled?}
+        (if show-title?
+          [composer-input-text post-state :title "Title" "Enter a title"]
+          [:span#counter {:class (str (if danger? "font-semibold text-red-700 ") "float-right mb-1 text-sm")} (str chars-left char-suffix " left")])
+        [:textarea {:class "bg-gray-200 focus:bg-white border border-gray-400 h-56 p-2 w-full"
+                    :value (:content @post-state)
+                    :placeholder "What do you want to say?"
+                    :on-change #(swap! post-state assoc :content (-> % .-target .-value))}]
+        [:p {:class "mb-3 text-gray-500 text-xs"} (:title help)]
+        [composer-input-files post-state :image "Attachment" "Browse..." disabled?]
+        [composer-input-date post-state :date "Date" "YYYY-MM-DD HH:MM"]
+        [composer-input-text post-state :slug "Slug" "Enter a slug"]
+        [composer-input-text post-state :categories "Categories" "Enter the categories (optional)"]]
        [:button {:class "bg-gray-500 hover:bg-red-700 float-left mx-auto mt-1 px-4 py-2 rounded text-white"
                  :type "button"
                  :on-click reset-states!} "Reset"]
-       [:button {:class "bg-blue-500 hover:bg-blue-700 float-right mx-auto mt-1 px-4 py-2 rounded text-white"
+       [:button {:class (str "bg-blue-500 hover:bg-blue-700 float-right mx-auto mt-1 px-4 py-2 rounded text-white"
+                             " disabled:opacity-50 disabled:cursor-not-allowed")
+                 :disabled disabled?
                  :type "submit"} "Post"]])]])
