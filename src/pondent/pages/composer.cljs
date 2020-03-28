@@ -149,8 +149,11 @@
        (for [file @files-state]
          ^{:key (:id file)} [composer-input-file file])
        [:p {:class "mb-1 mt-3 text-gray-500 text-xs"} (:files help)]])
-    [:label {:for "uploader"} [:button {:class "bg-teal-400 mb-3 px-4 py-2 rounded text-white"
-                                        :type "button"} button-text]]
+    [:button {:class (str "bg-teal-400 hover:bg-teal-600 mb-3 px-4 py-2 rounded text-white"
+                        " disabled:cursor-default disabled:opacity-50")
+              :type "button"
+              :on-click #(-> % .-target .-nextSibling .click)
+              :aria-hidden true} button-text]
     [:input#uploader {:class "hidden"
                       :type "file"
                       :multiple true
