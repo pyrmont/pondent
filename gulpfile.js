@@ -24,9 +24,12 @@ function build_css() {
 }
 
 function build_css_dev() {
+  const tailwindcss = require('tailwindcss');
   return src("resources/css/tailwind.css")
-    .pipe(postcss([require("postcss-import"),
-                   require("tailwindcss")]))
+    .pipe(postcss([
+          tailwindcss("tailwind.config.js"),
+          require('autoprefixer'),
+        ]))
     .pipe(src(["resources/css/github.css",
                "resources/css/symbols.css"]))
     .pipe(concat("style.css"))
