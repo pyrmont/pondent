@@ -1,6 +1,6 @@
 {
   "name": "pondent",
-  "version": "0.5.1",
+  "version": "0.5.2",
   "description": "A client-side posting utility",
   "main": "fig.js",
   "directories": {
