@@ -21,7 +21,7 @@
     "gulp-replace": "^1.0.0",
     "jsdom": "^16.0.0",
     "node-fetch": "^2.6.1",
-    "postcss": "^8.1.14",
+    "postcss": "^8.2.10",
     "tailwindcss": "^1.0.0"
   },
   "devDependencies": {},
