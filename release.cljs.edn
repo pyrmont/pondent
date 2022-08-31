@@ -1,5 +1,5 @@
 {:main pondent.core
  :closure-defines {pondent.core/gh-client-id "ea677578e270b9b24464"
-                   pondent.core/gh-auth-proxy "https://pondent-github-auth.herokuapp.com/authenticate/"}
+                   pondent.core/gh-auth-proxy "https://pondent-github-proxy.inqk.workers.dev/"}
  :output-to "docs/js/app.min.js"
  :optimizations :advanced}

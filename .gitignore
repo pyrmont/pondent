@@ -1,6 +1,5 @@
 /classes/
 /lib/
-/node_modules/
 /out/
 /target/
 
@@ -13,7 +12,9 @@
 .repl
 
 *.jar
+*.lockb
 pom.xml
 remote.cljs.edn
 
+node_modules/
 resources/public/css/style.css

@@ -57,6 +57,12 @@
   (http/get url (-> {:body payload} (add-headers opts))))
 
 
+(defn POST
+  "Make a POST request."
+  [url payload opts]
+  (http/post url (-> {:body payload} (add-headers opts))))
+
+
 (defn PUT
   "Make a PUT request."
   [url payload opts]
@@ -105,5 +111,5 @@
   "Get an API token for a given app."
   [proxy-url code]
   (-> (str proxy-url code)
-      (GET "" {})
+      (POST "" {})
       (p/then #(-> (:body %) body->map))))
