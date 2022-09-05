@@ -16,5 +16,7 @@
 pom.xml
 remote.cljs.edn
 
+fig.js
 node_modules/
+package.json
 resources/public/css/style.css

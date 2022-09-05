@@ -29,40 +29,22 @@ a server other than pyrmont.github.io.
 ### Requirements
 
 Pondent is a client-side JavaScript application written in ClojureScript. To
-compile it, you'll need:
-
-- Clojure
-- Node.js
-
-### Setup
-
-```console
-$ git clone git@github.com:pyrmont/pondent.git
-$ cd pondent
-$ npm install
-```
+compile it, you'll need Clojure and Tailwind.
 
 ### Compilation
 
-Pondent uses Figwheel to compile your ClojureScript. The `gulpfile.js` included
-in the project root provides a `dev` task that will compile the CSS and
-ClojureScript code, kick off an instance of Figwheel and start a watch on the
-CSS files in `resources/css/`.
-
-By default, Gulp will start Figwheel using the aliases `fig` and `build` that
-are defined in the `deps.edn` file. To use an alias other than `build` (e.g.
-`test`), pass the build name as a parameter to the `dev` task.
+Pondent uses Figwheel to compile your ClojureScript.
 
 For development:
 
 ```console
-$ gulp dev     # Use gulp dev --[buildname] for alternate aliases
+$ clojure -M:fig:dev
 ```
 
 For production:
 
 ```console
-$ gulp release
+$ clojure -M:fig:release
 ```
 
 ## Limitations
