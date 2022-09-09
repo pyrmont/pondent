@@ -110,6 +110,5 @@
 (defn auth-token-via-proxy
   "Get an API token for a given app."
   [proxy-url code]
-  (-> (str proxy-url code)
-      (POST (map->body {:code code}) {})
+  (-> (POST proxy-url (map->body {:code code}) {})
       (p/then #(-> (:body %) body->map))))
