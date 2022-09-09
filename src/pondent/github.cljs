@@ -111,5 +111,5 @@
   "Get an API token for a given app."
   [proxy-url code]
   (-> (str proxy-url code)
-      (POST "" {})
+      (POST (map->body {:code code}) {})
       (p/then #(-> (:body %) body->map))))
