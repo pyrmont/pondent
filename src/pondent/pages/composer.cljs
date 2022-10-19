@@ -176,13 +176,14 @@
              :on-change #(swap! form assoc input-name (-> % .-target .-value))}]])
 
 
-(defn composer-input-text [form input-name label placeholder]
+(defn composer-input-text [form input-name label placeholder autocomplete]
   [:<>
     [:label {:class "font-semibold block mb-1 w-2/12"} label]
     [:input {:class "bg-gray-200 block focus:bg-white border border-gray-400 mb-3 p-2 w-full"
              :type "text"
              :value (input-name @form)
              :placeholder placeholder
+             :autocomplete autocomplete
              :on-change #(swap! form assoc input-name (-> % .-target .-value))}]])
 
 
@@ -224,7 +225,7 @@
         [:p {:class "mb-3 text-gray-500 text-xs"} (:title help)]
         [composer-input-files post-state :image "Attachment" "Browse..." disabled?]
         [composer-input-date post-state :date "Date" "YYYY-MM-DD HH:MM"]
-        [composer-input-text post-state :slug "Slug" "Enter a slug"]
+        [composer-input-text post-state :slug "Slug" "Enter a slug" "off"]
         [composer-input-text post-state :categories "Categories" "Enter the categories (optional)"]]
        [:button {:class "bg-gray-500 hover:bg-red-700 float-left mx-auto mt-1 px-4 py-2 rounded text-white"
                  :type "button"
