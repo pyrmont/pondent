@@ -42,7 +42,7 @@ Pondent uses Figwheel to compile your ClojureScript.
 In development, Figwheel runs a local web server and recompiles on the fly:
 
 ```console
-$ clojure -M:fig:dev
+$ clojure -M:fig:build
 ```
 
 For production, Figwheel compiles your code into a single JavaScript file
