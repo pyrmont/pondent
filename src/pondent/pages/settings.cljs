@@ -25,14 +25,15 @@
         (p/then #(if-not % (swap! settings-state dissoc :gh-token))))))
 
 
-(defn settings-item [item-name label placeholder autocomplete]
+(defn settings-item [item-name label placeholder item-type]
   [:<>
     [:label {:class "font-semibold inline-block text-left w-3/12"} label]
     [:input {:class "bg-gray-200 inline-block focus:bg-white border border-gray-400 p-2 my-2 w-9/12"
-             :type "text"
+             :type (or item-type "text")
              :value (item-name @settings-state)
              :placeholder placeholder
-             :autocomplete autocomplete
+             :autocorrect "off"
+             :spellcheck "false"
              :on-change #(swap! settings-state assoc item-name (-> % .-target .-value))}]])
 
 
@@ -53,7 +54,7 @@
        (if @personal-token?
          [:<>
           [settings-item :gh-user "User:" "Enter the GitHub user" "username"]
-          [settings-item :gh-password "Token:" "Enter the GitHub access token"]]
+          [settings-item :gh-password "Token:" "Enter the GitHub access token" "password"]]
          [:div {:class "mx-auto my-2 w-9/12"}
           (let [colour  (if oauth-token? "bg-green-600" "bg-black")
                 url     (if oauth-token? (github/app-url pondent.core/gh-client-id)
@@ -80,14 +81,14 @@
                         (swap! settings-state assoc :init? true)
                         (router/push-state :pondent.core/composer))}
     [settings-title "Settings"]
-    [settings-item :owner "Owner:" "Enter the repository owner" "username"]
-    [settings-item :repo "Repo:" "Enter the repository name" "off"]
-    [settings-item :branch "Branch:" "Enter the repository branch" "off"]
+    [settings-item :owner "Owner:" "Enter the repository owner"]
+    [settings-item :repo "Repo:" "Enter the repository name"]
+    [settings-item :branch "Branch:" "Enter the repository branch"]
     [settings-section "Posts"]
-    [settings-item :posts-dir "Directory:" "Enter the posts directory" "off"]
+    [settings-item :posts-dir "Directory:" "Enter the posts directory"]
     [settings-item :posts-commit "Commit:" "Enter the commit message"]
     [settings-section "Uploads"]
-    [settings-item :uploads-dir "Directory:" "Enter the uploads directory" "off"]
+    [settings-item :uploads-dir "Directory:" "Enter the uploads directory"]
     [settings-item :uploads-url "URL:" "Enter the uploads URL" "url"]
     [settings-item :uploads-commit "Commit:" "Enter the commit message"]
     [settings-section "GitHub"]
