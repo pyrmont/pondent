@@ -184,7 +184,8 @@
              :value (input-name @form)
              :placeholder placeholder
              :autocorrect (:autocorrect opts "on")
-             :spellcheck (:spellcheck opts "true")
+             :autocapitalize (:autocorrect opts "on")
+             :spellcheck (:autocorrect opts "true")
              :on-change #(swap! form assoc input-name (-> % .-target .-value))}]])
 
 
@@ -226,8 +227,8 @@
         [:p {:class "mb-3 text-gray-500 text-xs"} (:title help)]
         [composer-input-files post-state :image "Attachment" "Browse..." disabled?]
         [composer-input-date post-state :date "Date" "YYYY-MM-DD HH:MM"]
-        [composer-input-text post-state :slug "Slug" "Enter a slug" {:autocorrect "off" :spellcheck "false"}]
-        [composer-input-text post-state :categories "Categories" "Enter the categories (optional)" {:autocorrect "off" :spellcheck "false"}]]
+        [composer-input-text post-state :slug "Slug" "Enter a slug" {:autocorrect "off"}]
+        [composer-input-text post-state :categories "Categories" "Enter the categories (optional)" {:autocorrect "off"}]]
        [:button {:class "bg-gray-500 hover:bg-red-700 float-left mx-auto mt-1 px-4 py-2 rounded text-white"
                  :type "button"
                  :on-click reset-states!} "Reset"]

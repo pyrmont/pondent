@@ -33,6 +33,7 @@
              :value (item-name @settings-state)
              :placeholder placeholder
              :autocorrect "off"
+             :autocapitalize "off"
              :spellcheck "false"
              :on-change #(swap! settings-state assoc item-name (-> % .-target .-value))}]])
 
