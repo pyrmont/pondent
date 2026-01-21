@@ -2,7 +2,7 @@
   "name": "pondent-github-proxy",
   "version": "0.0.0",
   "devDependencies": {
-    "wrangler": "^3.19.0"
+    "wrangler": "^3.114.17"
   },
   "private": true,
   "scripts": {
